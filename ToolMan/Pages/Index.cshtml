@@ -1,0 +1,42 @@
+﻿@page
+@using Microsoft.AspNetCore.Mvc.Localization
+@using ToolMan.Localization
+@inject IHtmlLocalizer<ToolManResource> L
+@model ToolMan.Pages.IndexModel
+
+@section styles {
+    <abp-style src="/Pages/Index.cshtml.css" />
+}
+@section scripts {
+    <abp-script src="/Pages/Index.cshtml.js" />
+}
+<div class="container">
+    <div class="card mt-5">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md d-flex align-items-center">
+                    <div class="pe-0 pe-md-4">
+                        <small class="text-uppercase text-muted">THE OFFICIAL GUIDE</small>
+                        <h2 class="mb-4">@L["The project uses the Scriban engine"]</h2>
+                        <p class="mb-4">@L["The author is lazy and leaves nothing."]</p>
+                        <div class="mb-4">
+                            <a href="https://github.com/scriban/scriban/tree/master#documentation" target="_blank" class="btn btn-primary mb-1">
+                                @L["Templates Grammar"]
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <h3 class="mb-4"># @L["Conventions"]</h3>
+                <p>
+                    1.
+                    @L["Files starting with @ in the template path are used as inline files by default. Use {{include '@myinclude.html'}} in the template to load the content of the required inline files."]
+                    <a href="https://github.com/scriban/scriban/blob/master/doc/language.md#911-include-name-arg1argn" target="_blank">
+                        ->
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

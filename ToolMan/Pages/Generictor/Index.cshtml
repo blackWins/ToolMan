@@ -1,0 +1,63 @@
+﻿@page
+@model AbpHelper.Pages.Generictor.IndexModel
+@using ToolMan.Menus;
+@using Microsoft.AspNetCore.Mvc.Localization
+@using ToolMan.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Modal;
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@inject IHtmlLocalizer<ToolManResource> L
+@inject IPageLayout PageLayout
+@{
+    PageLayout.Content.Title = L["Generictor"].Value;
+    PageLayout.Content.BreadCrumb.Add(L["Menu:Generictor"].Value);
+    PageLayout.Content.MenuItemName = ToolManMenus.Generictor;
+}
+
+@section styles {
+    <abp-style src="/Pages/Generictor/Index.cshtml.css" />
+}
+@section scripts {
+    <abp-script src="/Pages/Generictor/Index.cshtml.js" />
+}
+<abp-card>
+    <abp-card-body>
+        <abp-dynamic-form abp-model="ViewModel" id="ViewModel">
+            <abp-form-content />
+            <label>@L["Options"]</label>
+            <div id="jsoneditor" style="width: 100%; height: 420px;"></div>
+        </abp-dynamic-form>
+        <abp-row class="pt-3">
+            <abp-button button-type="Primary" id="GenerateButton">@L["Generate"].Value</abp-button>
+        </abp-row>
+    </abp-card-body>
+</abp-card>
+
+<script type="module">
+    import { JSONEditor } from '/libs/vanilla-jsoneditor/index.js'
+
+    // Or use it through a CDN (not recommended for use in production):
+    //import { JSONEditor } from 'https://unpkg.com/vanilla-jsoneditor/index.js'
+    // import { JSONEditor } from 'https://cdn.jsdelivr.net/npm/vanilla-jsoneditor/index.js'
+
+    let content = {
+        text: undefined,
+        json: {
+        }
+    }
+
+    // use methods get, set, update, and onChange to get data in or out of the editor.
+    // Use updateProps to update properties.
+    const editor = new JSONEditor({
+        target: document.getElementById('jsoneditor'),
+        props: {
+            content,
+            onChange: (updatedContent, previousContent, { contentErrors, patchResult }) => {
+                // content is an object { json: JSONValue } | { text: string }
+                //console.log('onChange', { updatedContent, previousContent, contentErrors, patchResult })
+                content = updatedContent
+                $("#ViewModel_Options").val(JSON.stringify(updatedContent.json))
+            }
+        }
+    })
+
+</script>

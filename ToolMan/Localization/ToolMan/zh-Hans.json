@@ -1,0 +1,18 @@
+{
+  "culture": "zh-Hans",
+  "texts": {
+    "Welcome_Title": "欢迎",
+    "Welcome_Text": "这是ABP框架的极简单层应用程序启动模板.",
+    "Menu:Home": "首页",
+    "The project uses the Scriban engine": "项目使用 Scriban 引擎",
+    "Templates Grammar": "模板语法",
+    "Conventions": "约定",
+    "Menu:Generictor": "通用引擎",
+    "Generictor": "通用引擎",
+    "Files starting with @ in the template path are used as inline files by default. Use {{include '@myinclude.html'}} in the template to load the content of the required inline files.": "模板路径下以@开头文件默认作为内联文件，在模板中使用 {{include '@myinclude.html'}} 加载所需的内联文件内容。",
+    "TemplatePath": "模板路径",
+    "OutputPath": "输出路径",
+    "Options": "模板参数",
+    "Generate": "生成"
+  }
+}
