@@ -16,3 +16,5 @@ Happy coding..!
 
 
 
+## Browser extensions
+Dealing with code tags at the end of paragraphs after translation of web pages. [>click here<](https://microsoftedge.microsoft.com/addons/detail/%E7%BF%BB%E8%AF%91%E8%AE%BE%E7%BD%AE/kfgcdfhmodedolojlfmnpkdlnaaboiee)
