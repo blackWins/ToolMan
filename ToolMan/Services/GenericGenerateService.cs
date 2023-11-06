@@ -17,9 +17,18 @@ namespace ToolMan.Services
 
         public async Task<bool> RunAsync(GenericGenerateDto input)
         {
-            var model = JsonConvert.DeserializeObject<Dictionary<string, object>>(input.Options);
+            var model = JsonConvert.DeserializeObject<Dictionary<string, object>>(input.Options) ?? new Dictionary<string, object>();
 
-            await _generator.RunAsync(input.TemplatePath, input.OutputPath, model);
+            var templatePath = input.TemplatePath.Split('.');
+
+            if (templatePath.Length > 1 && !templatePath.Last().Contains("}}"))
+            {
+                await _generator.RenderAsync(new[] { input.TemplatePath }, Path.GetDirectoryName(input.TemplatePath)!, input.OutputPath, model);
+            }
+            else
+            {
+                await _generator.RenderAsync(input.TemplatePath, input.OutputPath, model);
+            }
 
             return true;
         }

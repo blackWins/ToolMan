@@ -13,6 +13,24 @@
     "TemplatePath": "模板路径",
     "OutputPath": "输出路径",
     "Options": "模板参数",
-    "Generate": "生成"
+    "Create": "创建",
+    "Rename": "重命名",
+    "Delete": "删除",
+    "All Generate": "全部生成",
+    "Only Preview Item": "仅预览项",
+    "OutputPath Is Empty": "输出路径 为空",
+    "TemplatePath Or TemplateFile Is Empty": "模板路径 或 模板文件 为空",
+    "Generate Succesful": "生成成功",
+    "Update Succesful": "更新成功",
+    "Preview": "预览",
+    "Templates": "模板",
+    "TemplateContent": "模板内容",
+    "Update": "更新",
+    "Full Screen": "全屏",
+    "Confirm the permanent deletion": "确认永久删除 {0} ？",
+    "SuccessfullyDeleted": "删除成功",
+    "Refresh": "刷新",
+    "Open All": "全部展开",
+    "Close All": "全部折叠"
   }
 }

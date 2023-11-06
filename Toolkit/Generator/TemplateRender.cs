@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Scriban;
 using Scriban.Runtime;
+using Volo.Abp;
 using Volo.Abp.DependencyInjection;
 
 namespace Toolkit.Generator

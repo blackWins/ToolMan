@@ -6,6 +6,14 @@
       "provider": "unpkg",
       "library": "vanilla-jsoneditor@0.18.2",
       "destination": "wwwroot/libs/vanilla-jsoneditor/"
+    },
+    {
+      "library": "jstree@3.3.16",
+      "destination": "wwwroot/libs/jstree/"
+    },
+    {
+      "library": "highlight.js@11.9.0",
+      "destination": "wwwroot/libs/highlight.js/"
     }
   ]
 }

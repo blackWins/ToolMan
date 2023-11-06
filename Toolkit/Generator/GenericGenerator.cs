@@ -16,7 +16,7 @@ namespace Toolkit.Generator
             _templateRender = templateRender;
         }
 
-        public virtual async Task RunAsync(string templateDirectoryPath, string targetPath, object model, string searchPattern = "*.*")
+        public virtual async Task RenderAsync(string templateDirectoryPath, string targetPath, object model, string searchPattern = "*.*")
         {
             DirectoryInfo dir = new DirectoryInfo(templateDirectoryPath);
 

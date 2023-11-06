@@ -1,96 +1,189 @@
 ﻿$(function () {
 
-    var getData = function () {
-        var input = {};
-        $("#ViewModel").serializeArray().forEach(function (data) {
-            input[data.name.replace(/ViewModel./g, '')] = data.value;
-        })
-        return input;
-    };
+    var L = abp.localization.getResource('ToolMan');
+    var Service = toolMan.services.template;
 
-    $('#GenerateButton').click(function (e) {
-        toolMan.services.genericGenerate.run(getData()).done((res) => {
-            abp.notify.info('Generate Succesful')
+    let CurrentPath = '';
+
+    $('#GenerateLButton').click(function (e) {
+        Generate($("#ViewModel_TemplatePath").val());
+    })
+
+    $('#GenerateRButton').click(function (e) {
+        Generate(CurrentPath);
+    })
+
+    function Generate(path) {
+        var input = {
+            templatePath: path,
+            outputPath: $("#ViewModel_OutputPath").val(),
+            options: $("#ViewModel_Options").val()
+        }
+        if (input.templatePath == '') {
+            abp.notify.error(L('TemplatePath Or TemplateFile Is Empty'));
+            return
+        }
+        if (input.outputPath == '') {
+            abp.notify.error(L('OutputPath Is Empty'));
+            return
+        }
+
+        toolMan.services.genericGenerate.run(input).done((res) => {
+            abp.notify.info(L('Generate Succesful'))
+        })
+    }
+
+    $("#UpdateBtn").click(function (e) {
+        Service.updateContent({ path: CurrentPath, content: $("#Template").val() }).done((res) => {
+            abp.notify.info(L('Update Succesful'))
+            Preview();
         })
     })
 
-    /*
-    // create the editor
-    const container = document.getElementById("jsoneditor")
-    const options = {}
-    const editor = new JSONEditor(container, options)
+    $("#ViewModel_Options").on('change', function (e) {
+        Preview();
+    })
 
-    // set json
-    const initialJson = {
-        "Array": [1, 2, 3],
-        "Boolean": true,
-        "Null": null,
-        "Number": 123,
-        "Object": { "a": "b", "c": "d" },
-        "String": "Hello World"
-    }
-    editor.set(initialJson)
-
-    // get json
-    const updatedJson = editor.get()
-
-    var input = document.getElementById("ViewModel_Options");
-
-    function formatJson() {
-        try {
-            var json = JSON.parse(input.value);
-            var formattedJson = JSON.stringify(json, null, 4);
-            input.value = formattedJson;
-        } catch (e) {
-            console.log("Error: Invalid JSON data!");
-        }
+    function HighLightCode() {
+        hljs.highlightElement($("#Preview")[0]);
+        $("#Preview_modal").html($("#Preview").html());
     }
 
-    //input.addEventListener("focus", formatJson);
+    HighLightCode();
 
-    input.addEventListener("blur", formatJson);
+    function Preview() {
+        if (CurrentPath == '') return;
+        var input = {
+            path: CurrentPath,
+            options: $("#ViewModel_Options").val()
+        }
+        $('#Preview').removeAttr('data-highlighted class');
+        Service.preview(input)
+            .done((res) => {
+                var arr = CurrentPath.split(/\\/);
+                var fileName = '/**** ' + arr[arr.length - 1] + ' ****/\r\n\r\n';
+                $('#Preview').text(fileName + res);
+                HighLightCode()
+            })
+    }
 
-    let fnKey = ['Tab', 'CapsLock', 'Shift', 'Control', 'Enter', 'Backspace', 'Escape'];
-    let ignoreSymbol = ['[', '] ', '{', '}', '', ',']
-    let symbol = ['', ' ', '{', ',']
-    let symbolGroup = ['[', '{', '"']
-    let _symbolGroup = [']', '}', '"']
+    function GetTemplate() {
+        if (CurrentPath == '') return;
+        Service.getContent(CurrentPath)
+            .done((res) => {
+                $("#Template").val(res);
+                Preview();
+            })
+    }
 
-    input.addEventListener("keydown", function (event) {
-        console.log(event.key)
-        var cursorPosition = input.selectionStart;
-        var text = input.value;
-        if (symbolGroup.indexOf(event.key) >= 0 && text.length > 0) {
-            var i = symbolGroup.indexOf(event.key)
-            input.setRangeText(_symbolGroup[i], cursorPosition, cursorPosition, "start");
-        }
-        console.log(text[cursorPosition])
-        if (event.key === "Enter") {
-            if (symbol.indexOf(text[cursorPosition - 1]) == -1) {
-                input.setRangeText(',', cursorPosition, cursorPosition, "end");
-            }
-        }
-        if (event.key === "Tab") {
-            input.setRangeText("    ", cursorPosition, cursorPosition, "end");
-            event.preventDefault();
-        }
+    $("#OpenAllBtn").click(function (e) {
+        $('#jstree').jstree('open_all');
+    })
 
-        var lineStart = text.slice(0, cursorPosition).lastIndexOf("\n") + 1;
-        var lineEnd = text.indexOf("\n", cursorPosition);
-        if (lineEnd === -1) {
-            lineEnd = text.length;
-        }
-        var currentLine = text.slice(lineStart, lineEnd).trimStart();
-        if (currentLine[0] !== '"' && ignoreSymbol.indexOf(currentLine) < 0) {
-            input.setRangeText('"', cursorPosition - 1, cursorPosition - 1, "end");
-            input.setRangeText('"', cursorPosition + 1, cursorPosition + 1, "start");
-        }
+    $("#CloseAllBtn").click(function (e) {
+        $('#jstree').jstree('close_all');
+    })
 
-        lineEnd -= text[lineEnd - 1] === ',' ? 1 : 0
-        if (symbolGroup.indexOf(event.key) < 0 && fnKey.indexOf(event.key) < 0 && cursorPosition > 3 && text[lineEnd - 1] === ':' && text[lineEnd - 2] === '"') {
-            input.setRangeText('"', cursorPosition, cursorPosition, "end");
-            input.setRangeText('"', cursorPosition + 1, cursorPosition + 1, "start");
-        }
+    $("#RefreshBtn").click(function (e) {
+        LoadTree();
     });
-    */
+    $("#ViewModel_TemplatePath").on('input', function (e) {
+        LoadTree();
+    });
+
+    function LoadTree() {
+        var path = $("#ViewModel_TemplatePath").val();
+        if (path == '' || path.indexOf(':') == -1) return;
+        Service.getDirectoryTree(path)
+            .then((val) => {
+                $('#jstree').jstree('destroy');
+                RenderTree(val);
+            })
+    }
+
+    function RenderTree(data) {
+        $('#jstree').jstree({
+            core: {
+                check_callback: true,
+                data: data,
+                state: { 'core': { 'state': 'open' } }
+            },
+            plugins: [
+                "contextmenu",
+                "dnd",
+                'wholerow',
+                'state'
+            ],
+            contextmenu: {
+                items: function (node) {
+                    var arr = node.text.split('.');
+                    var items = $.jstree.defaults.contextmenu.items();
+                    delete items.ccp;
+                    items.create.label = L(items.create.label)
+                    items.rename.label = L(items.rename.label)
+                    items.remove.label = L(items.remove.label)
+                    if (arr.length > 1 && arr[arr.length - 1].indexOf('}}') == -1) {
+                        delete items.create;
+                    }
+                    return items
+                }
+            },
+        }).on('select_node.jstree', (event, record) => {
+            CurrentPath = record.node.original.filePath;
+            var arr = CurrentPath.split('.');
+            if (arr.length > 1 && arr[arr.length - 1].indexOf('}}') == -1) {
+                GetTemplate();
+            }
+        }).on('delete_node.jstree', function (event, record) {
+            if (!record.node.original.filePath) {
+                record.instance.refresh();
+                return
+            }
+            abp.message.confirm(L('DeletionConfirmationMessage', record.node.text))
+                .then(function (confirmed) {
+                    if (confirmed && record.node.original.filePath) {
+                        Service.delete(record.node.original.filePath)
+                            .then(function () {
+                                abp.notify.info(L('SuccessfullyDeleted'));
+                            });
+                    }
+                    else {
+                        record.instance.refresh();
+                    }
+                });
+        }).on('rename_node.jstree', function (event, record) {
+            if (record.old == record.text) return
+            var filePath = record.node.original.filePath;
+            debugger
+            if (!filePath) {
+                var p_record = $('#jstree').jstree('get_node', record.node.parent)
+                var path = p_record.original.filePath + '\\' + record.text;
+                Service.create(path).done((res) => { GetTemplate(); })
+                //set node filePath
+                var originalData = record.node.original;
+                originalData.filePath = path;
+                record.node.original = originalData;
+                return
+            }
+            Service.rename(filePath, record.text).done(() => {
+                var originalData = record.node.original;
+                originalData.filePath = filePath.replace(record.old, record.text);
+                record.node.original = originalData;
+            }).catch(() => { record.instance.refresh() });
+        }).on('move_node.jstree', function (event, record) {
+            var p_record = $('#jstree').jstree('get_node', record.parent)
+            Service.move(record.node.original.filePath, p_record.original.filePath).done((res) => {
+                if (record.node.children.length == 0) {
+                    var originalData = record.node.original;
+                    originalData.filePath = res
+                    record.node.original = originalData;
+                    return
+                }
+                setTimeout(() => {
+                    $("#ViewModel_TemplatePath").trigger("input");
+                }, 500);
+            }).catch(() => { record.instance.refresh() });
+        });
+    }
+
 });

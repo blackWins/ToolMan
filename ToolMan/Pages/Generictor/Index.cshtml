@@ -15,22 +15,69 @@
 
 @section styles {
     <abp-style src="/Pages/Generictor/Index.cshtml.css" />
+    <link href="~/libs/jstree/themes/default/style.min.css" rel="stylesheet" />
+    <link href="~/libs/highlight.js/styles/vs2015.min.css" rel="stylesheet" />
 }
 @section scripts {
+    <script src="~/libs/jstree/jstree.min.js"></script>
+    @* https://highlightjs.readthedocs.io/en/latest/api.html#highlight *@
+    <script src="~/libs/highlight.js/highlight.min.js"></script>
     <abp-script src="/Pages/Generictor/Index.cshtml.js" />
 }
+
 <abp-card>
     <abp-card-body>
-        <abp-dynamic-form abp-model="ViewModel" id="ViewModel">
-            <abp-form-content />
-            <label>@L["Options"]</label>
-            <div id="jsoneditor" style="width: 100%; height: 420px;"></div>
-        </abp-dynamic-form>
-        <abp-row class="pt-3">
-            <abp-button button-type="Primary" id="GenerateButton">@L["Generate"].Value</abp-button>
+        <abp-row>
+            <abp-column size="_4">
+                <abp-tabs>
+                    <abp-tab title="@L["Templates"].Value">
+                        <abp-input asp-for="ViewModel.TemplatePath" />
+                        <div id="jstree" style="height:440px;overflow:scroll;"></div>
+                        <abp-button icon="refresh" id="RefreshBtn" text="@L["Refresh"].Value" />
+                        <abp-button icon="caret-down" id="OpenAllBtn" text="@L["Open All"].Value" />
+                        <abp-button icon="caret-right" id="CloseAllBtn" text="@L["Close All"].Value" />
+                    </abp-tab>
+                    <abp-tab title="@L["TemplateContent"].Value">
+                        <textarea id="Template" style="width:100%;height: 538px;"></textarea>
+                        <abp-row class="m-auto">
+                            <abp-button id="UpdateBtn" button-type="Secondary">@L["Update"]</abp-button>
+                        </abp-row>
+                    </abp-tab>
+                </abp-tabs>
+            </abp-column>
+            <abp-column size="_4">
+                <abp-input asp-for="ViewModel.OutputPath" />
+                <label>@L["Options"]</label>
+                <div id="jsoneditor" style="width: 100%; height: 510px;"></div>
+                <abp-row style="padding-top:0.3rem" class="m-auto">
+                    <abp-button-group class="mr-2">
+                        <abp-button button-type="Primary" class="text-center" id="GenerateLButton">@L["All Generate"].Value</abp-button>
+                        <abp-button button-type="Primary" class="text-center" id="GenerateRButton">@L["Only Preview Item"].Value</abp-button>
+                    </abp-button-group>
+                </abp-row>
+                <abp-input asp-for="ViewModel.Options" />
+            </abp-column>
+            <abp-column size="_4">
+                <abp-tabs>
+                    <abp-tab title="@L["Preview"].Value">
+                        <pre style="margin-bottom:0"><code style="height:540px; width:100%;overflow:scroll;" id="Preview"></code></pre>
+                        <abp-row style="padding-top:0.3rem" class="m-auto">
+                            <abp-button button-type="Secondary" data-bs-toggle="modal" data-bs-target="#PreviewModal">@L["Full Screen"]</abp-button>
+                        </abp-row>
+                    </abp-tab>
+                </abp-tabs>
+            </abp-column>
         </abp-row>
     </abp-card-body>
 </abp-card>
+
+<abp-modal centered="true" scrollable="true" size="Fullscreen" id="PreviewModal">
+    <abp-modal-header title="@L["Preview"].Value"></abp-modal-header>
+    <abp-modal-body>
+        <pre><code id="Preview_modal" class="hljs"></code></pre>
+    </abp-modal-body>
+    <abp-modal-footer buttons="@(AbpModalButtons.Close)"></abp-modal-footer>
+</abp-modal>
 
 <script type="module">
     import { JSONEditor } from '/libs/vanilla-jsoneditor/index.js'
@@ -55,7 +102,15 @@
                 // content is an object { json: JSONValue } | { text: string }
                 //console.log('onChange', { updatedContent, previousContent, contentErrors, patchResult })
                 content = updatedContent
-                $("#ViewModel_Options").val(JSON.stringify(updatedContent.json))
+                console.log(JSON.stringify(content.json))
+                // console.log($("#ViewModel_Options").val())
+                var jsonStr = JSON.stringify(content.json);
+
+                $("#ViewModel_Options").val(jsonStr);
+
+                if (jsonStr.indexOf('"New item":""') + jsonStr.indexOf(':""') <= -1) {
+                    $("#ViewModel_Options").trigger("change")
+                }
             }
         }
     })
