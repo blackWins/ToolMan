@@ -14,8 +14,8 @@ namespace Toolkit.Generator
     {
         public virtual async Task<string> RenderFromFileAsync(
             [NotNull] string templateFullPath,
-            [CanBeNull] object model = null,
-            [CanBeNull] Dictionary<string, object> globalContext = null)
+            [CanBeNull] object? model = null,
+            [CanBeNull] Dictionary<string, object>? globalContext = null)
         {
             var templateContent = File.ReadAllText(templateFullPath);
 
@@ -24,8 +24,8 @@ namespace Toolkit.Generator
 
         public virtual async Task<string> RenderAsync(
             [NotNull] string templateContent,
-            [CanBeNull] object model = null,
-            [CanBeNull] Dictionary<string, object> globalContext = null,
+            [CanBeNull] object? model = null,
+            [CanBeNull] Dictionary<string, object>? globalContext = null,
             [CanBeNull] string? includeTemplatePath = null)
         {
             if (globalContext == null)
@@ -39,13 +39,21 @@ namespace Toolkit.Generator
             {
                 context.TemplateLoader = new TemplateLoader(Path.HasExtension(includeTemplatePath) ? Path.GetDirectoryName(includeTemplatePath) : includeTemplatePath!);
             }
+            var content = (await Template
+                   .Parse(templateContent)
+                   .RenderAsync(context)).Replace("\r\n", Environment.NewLine);
 
-            return (await Template
-                    .Parse(templateContent)
-                    .RenderAsync(context)).Replace("\r\n", Environment.NewLine);
+            context.CurrentGlobal.TryGetValue(TookitConsts.SKIP_GENERATE, out object value);
+
+            if (value is bool skipGenerate && skipGenerate)
+            {
+                return string.Empty;
+            }
+
+            return content;
         }
 
-        protected virtual TemplateContext CreateScribanTemplateContext(Dictionary<string, object> globalContext, object model = null)
+        protected virtual TemplateContext CreateScribanTemplateContext(Dictionary<string, object> globalContext, object? model = null)
         {
             var context = new TemplateContext();
 
