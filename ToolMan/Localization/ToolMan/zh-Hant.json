@@ -31,6 +31,10 @@
     "SuccessfullyDeleted": "删除成功",
     "Refresh": "刷新",
     "Open All": "全部展開",
-    "Close All": "全部收縮"
+    "Close All": "全部收縮",
+    "Template Render Error": "模板渲染錯誤",
+    "Can only be moved to a folder": "只能移動到文件夾下",
+    "Path error": "路徑錯誤",
+    "Template content is null or whiteSpace or global variable {{SKIP_GENERATE=true}}. No file be generated": "儅模板内容為IsNullOrWhiteSpace或全局變量 {{SKIP_GENERATE=true}} 時不生成任何文件"
   }
 }

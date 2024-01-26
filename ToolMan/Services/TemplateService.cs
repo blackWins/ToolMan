@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Toolkit.Generator;
+using ToolMan.Localization;
 using ToolMan.Services.Dtos;
 using Volo.Abp;
 using Volo.Abp.Application.Services;
@@ -14,6 +15,7 @@ namespace ToolMan.Services
         public TemplateService(TemplateRender render)
         {
             _render = render;
+            LocalizationResource = typeof(ToolManResource);
         }
 
         public async Task CreateAsync(string path)
@@ -77,7 +79,7 @@ namespace ToolMan.Services
 
             if (Path.HasExtension(newPath) && !newPath.EndsWith("}}"))
             {
-                throw new UserFriendlyException("Can not move to a file path");
+                throw new UserFriendlyException(L["Can only be moved to a folder"].Value);
             }
 
             var fileName = Path.GetFileName(oldPath);
@@ -98,7 +100,7 @@ namespace ToolMan.Services
 
         public async Task<DirectoryTreeDto> GetDirectoryTreeAsync(string path)
         {
-            if (!Path.Exists(path)) return new DirectoryTreeDto("path error");
+            if (!Path.Exists(path)) return new DirectoryTreeDto(L["Path error"]);
 
             var dto = BuildDirectoryFileTree(path.TrimEnd());
 
@@ -109,12 +111,12 @@ namespace ToolMan.Services
         {
             var node = new DirectoryTreeDto(directory);
 
-            foreach (var dir in Directory.GetDirectories(directory))
+            foreach (var dir in Directory.GetDirectories(directory).Order())
             {
                 node.AddChild(BuildDirectoryFileTree(dir));
             }
 
-            foreach (var file in Directory.GetFiles(directory))
+            foreach (var file in Directory.GetFiles(directory).Order())
             {
                 node.AddChild(new DirectoryTreeDto(file));
             }
@@ -152,7 +154,7 @@ namespace ToolMan.Services
             }
             catch (Exception e)
             {
-                return $" Template Render Error:\r\n {e.Message}";
+                return L["Template Render Error"].Value + $":\r\n {e.Message}";
             }
         }
     }

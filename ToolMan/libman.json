@@ -3,11 +3,6 @@
   "defaultProvider": "cdnjs",
   "libraries": [
     {
-      "provider": "unpkg",
-      "library": "vanilla-jsoneditor@0.18.2",
-      "destination": "wwwroot/libs/vanilla-jsoneditor/"
-    },
-    {
       "library": "jstree@3.3.16",
       "destination": "wwwroot/libs/jstree/"
     },
@@ -18,6 +13,10 @@
     {
       "library": "monaco-editor@0.45.0",
       "destination": "wwwroot/libs/monaco-editor/"
+    },
+    {
+      "library": "jsoneditor@10.0.0",
+      "destination": "wwwroot/libs/jsoneditor/"
     }
   ]
 }

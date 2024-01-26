@@ -17,8 +17,10 @@
     <abp-style src="/Pages/Generictor/Index.cshtml.css" />
     <link href="~/libs/jstree/themes/default/style.min.css" rel="stylesheet" />
     <link href="~/libs/highlight.js/styles/vs2015.min.css" rel="stylesheet" />
+    <link href="~/libs/jsoneditor/jsoneditor.min.css" rel="stylesheet" />
 }
 @section scripts {
+    <script src="~/libs/jsoneditor/jsoneditor.min.js"></script>
     <script src="~/libs/jstree/jstree.min.js"></script>
     @* https://highlightjs.readthedocs.io/en/latest/api.html#highlight *@
     <script src="~/libs/highlight.js/highlight.min.js"></script>
@@ -49,7 +51,7 @@
                 <abp-input asp-for="ViewModel.OutputPath" />
                 <label>@L["Options"]</label>
                 <div id="jsoneditor" style="width: 100%; height: 510px;"></div>
-                <abp-row style="padding-top:0.3rem" class="m-auto">
+                <abp-row style="padding-top:0.3rem">
                     <abp-button-group class="mr-2">
                         <abp-button button-type="Primary" class="text-center" id="GenerateLButton">@L["All Generate"].Value</abp-button>
                         <abp-button button-type="Primary" class="text-center" id="GenerateRButton">@L["Only Preview Item"].Value</abp-button>
@@ -78,41 +80,3 @@
     </abp-modal-body>
     <abp-modal-footer buttons="@(AbpModalButtons.Close)"></abp-modal-footer>
 </abp-modal>
-
-<script type="module">
-    import { JSONEditor } from '/libs/vanilla-jsoneditor/index.js'
-
-    // Or use it through a CDN (not recommended for use in production):
-    //import { JSONEditor } from 'https://unpkg.com/vanilla-jsoneditor/index.js'
-    // import { JSONEditor } from 'https://cdn.jsdelivr.net/npm/vanilla-jsoneditor/index.js'
-
-    let content = {
-        text: undefined,
-        json: {
-        }
-    }
-
-    // use methods get, set, update, and onChange to get data in or out of the editor.
-    // Use updateProps to update properties.
-    const editor = new JSONEditor({
-        target: document.getElementById('jsoneditor'),
-        props: {
-            content,
-            onChange: (updatedContent, previousContent, { contentErrors, patchResult }) => {
-                // content is an object { json: JSONValue } | { text: string }
-                //console.log('onChange', { updatedContent, previousContent, contentErrors, patchResult })
-                content = updatedContent
-                console.log(JSON.stringify(content.json))
-                // console.log($("#ViewModel_Options").val())
-                var jsonStr = JSON.stringify(content.json);
-
-                $("#ViewModel_Options").val(jsonStr);
-
-                if (jsonStr.indexOf('"New item":""') + jsonStr.indexOf(':""') <= -1) {
-                    $("#ViewModel_Options").trigger("change")
-                }
-            }
-        }
-    })
-
-</script>

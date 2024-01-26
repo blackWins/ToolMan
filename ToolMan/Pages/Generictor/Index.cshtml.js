@@ -185,5 +185,39 @@
             }).catch(() => { record.instance.refresh() });
         });
     }
+    
+    const options = {
+        search: false,
+        modes: ['tree', 'code'],
+        onChangeText: (v) => {
+            try {
+                var json = JSON.parse(v);
+                if (json[''] === '') return;
 
+                $("#ViewModel_Options").val(JSON.stringify(json));
+                $("#ViewModel_Options").trigger("change")
+            } catch (err) {
+            }
+        }
+    }
+
+    const editor = new JSONEditor(document.getElementById("jsoneditor"), options)
+
+    /*
+    
+    editor.options.templates = [{
+        text: 'Address',
+        title: 'Insert a Address Node',
+        field: 'AddressTemplate',
+        value: {
+            'street': "",
+            'city': "",
+            'state': "",
+            'ZIP code': ""
+        }
+    }]
+    
+    editor.set(initialJson);
+    
+    */
 });

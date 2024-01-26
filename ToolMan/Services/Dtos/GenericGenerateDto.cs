@@ -18,6 +18,6 @@ namespace ToolMan.Services.Dtos
 
         [HiddenInput]
         [DisplayName("Options")]
-        public string Options { get; set; }
+        public string? Options { get; set; }
     }
 }

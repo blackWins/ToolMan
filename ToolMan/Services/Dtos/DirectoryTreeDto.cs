@@ -6,7 +6,13 @@
         {
             FilePath = filePath;
             Text = Path.GetFileName(filePath) ?? Path.GetDirectoryName(filePath);
-            Icon = Path.HasExtension(filePath) ? "jstree-file" : "jstree-folder";
+            if (!Path.HasExtension(Text) || Text.StartsWith("{{") && Text.EndsWith("}}"))
+            {
+                Icon = "jstree-folder";
+                return;
+            }
+
+            Icon = Text.StartsWith("@") ? "fa fa-cubes" : "jstree-file";
         }
 
         public string? Text { get; private set; }

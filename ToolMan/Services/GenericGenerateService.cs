@@ -17,7 +17,7 @@ namespace ToolMan.Services
 
         public async Task<bool> RunAsync(GenericGenerateDto input)
         {
-            var model = JsonConvert.DeserializeObject<Dictionary<string, object>>(input.Options) ?? new Dictionary<string, object>();
+            var model = JsonConvert.DeserializeObject<Dictionary<string, object>>(input.Options ?? "{}");
 
             var templatePath = input.TemplatePath.Split('.');
 
