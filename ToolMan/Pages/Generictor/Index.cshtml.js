@@ -1,16 +1,18 @@
 ﻿$(function () {
+    require.config({ paths: { vs: '../libs/monaco-editor/min/vs' } });
+    require(['vs/editor/editor.main'], function () { });
 
-    var L = abp.localization.getResource('ToolMan');
-    var Service = toolMan.services.template;
+    var l = abp.localization.getResource('ToolMan');
+    var templateService = toolMan.services.template;
 
-    let CurrentPath = '';
+    let currentPath = '';
 
     $('#GenerateLButton').click(function (e) {
         Generate($("#ViewModel_TemplatePath").val());
     })
 
     $('#GenerateRButton').click(function (e) {
-        Generate(CurrentPath);
+        Generate(currentPath);
     })
 
     function Generate(path) {
@@ -20,81 +22,68 @@
             options: $("#ViewModel_Options").val()
         }
         if (input.templatePath == '') {
-            abp.notify.error(L('TemplatePath Or TemplateFile Is Empty'));
+            abp.notify.error(l('TemplatePath Or TemplateFile Is Empty'));
             return
         }
         if (input.outputPath == '') {
-            abp.notify.error(L('OutputPath Is Empty'));
+            abp.notify.error(l('OutputPath Is Empty'));
             return
         }
 
         toolMan.services.genericGenerate.run(input).done((res) => {
-            abp.notify.info(L('Generate Succesful'))
+            abp.notify.info(l('Generate Succesful'))
         })
     }
 
     $("#UpdateBtn").click(function (e) {
-        Service.updateContent({ path: CurrentPath, content: $("#Template").val() }).done((res) => {
-            abp.notify.info(L('Update Succesful'))
+        templateService.updateContent({ path: currentPath, content: $("#Template").val() }).done((res) => {
+            abp.notify.info(l('Update Succesful'))
             Preview();
         })
     })
 
-    $("#ViewModel_Options").on('change', function (e) {
-        Preview();
-    })
-
-    function HighLightCode() {
-        hljs.highlightElement($("#Preview")[0]);
-        $("#Preview_modal").html($("#Preview").html());
-    }
-
-    HighLightCode();
+    $("#ViewModel_Options").on('change', Preview)
 
     function Preview() {
-        if (CurrentPath == '') return;
+        if (currentPath == '') return;
         var input = {
-            path: CurrentPath,
+            path: currentPath,
             options: $("#ViewModel_Options").val()
         }
+
         $('#Preview').removeAttr('data-highlighted class');
-        Service.preview(input)
+
+        templateService.preview(input)
             .done((res) => {
-                var arr = CurrentPath.split(/\\/);
+                var arr = currentPath.split(/\\/);
                 var fileName = '/**** ' + arr[arr.length - 1] + ' ****/\r\n\r\n';
                 $('#Preview').text(fileName + res);
-                HighLightCode()
+                hljs.highlightElement($("#Preview")[0]);
+                $("#Preview_modal").html($("#Preview").html());
             })
     }
 
-    function GetTemplate() {
-        if (CurrentPath == '') return;
-        Service.getContent(CurrentPath)
-            .done((res) => {
-                $("#Template").val(res);
-                Preview();
-            })
-    }
+    /************************************************************************
+     * jstree Configurations                                                *
+     ************************************************************************/
 
     $("#OpenAllBtn").click(function (e) {
         $('#jstree').jstree('open_all');
     })
-
     $("#CloseAllBtn").click(function (e) {
         $('#jstree').jstree('close_all');
     })
-
     $("#RefreshBtn").click(function (e) {
         LoadTree();
-    });
+    })
     $("#ViewModel_TemplatePath").on('input', function (e) {
         LoadTree();
-    });
+    })
 
     function LoadTree() {
         var path = $("#ViewModel_TemplatePath").val();
         if (path == '' || path.indexOf(':') == -1) return;
-        Service.getDirectoryTree(path)
+        templateService.getDirectoryTree(path)
             .then((val) => {
                 $('#jstree').jstree('destroy');
                 RenderTree(val);
@@ -118,33 +107,44 @@
                 items: function (node) {
                     var arr = node.text.split('.');
                     var items = $.jstree.defaults.contextmenu.items();
-                    delete items.ccp;
-                    items.create.label = L(items.create.label)
-                    items.rename.label = L(items.rename.label)
-                    items.remove.label = L(items.remove.label)
+                    items.ccp = {
+                        label: l(items.ccp.label),
+                        action: (data) => {
+                            //var refTree = $.jstree.reference(data.reference);
+                            //var filePath = refTree.get_node(data.reference).original.filePath;
+                            if (node.icon !== 'jstree-folder') {
+                                var name = currentPath.split(/\\/).pop();
+                                CreateTab(name);
+                            }
+                        }
+                    };
+
+                    items.create.label = l(items.create.label)
+                    items.rename.label = l(items.rename.label)
+                    items.remove.label = l(items.remove.label)
                     if (arr.length > 1 && arr[arr.length - 1].indexOf('}}') == -1) {
                         delete items.create;
+                    }
+                    else {
+                        delete items.ccp;
                     }
                     return items
                 }
             },
         }).on('select_node.jstree', (event, record) => {
-            CurrentPath = record.node.original.filePath;
-            var arr = CurrentPath.split('.');
-            if (arr.length > 1 && arr[arr.length - 1].indexOf('}}') == -1) {
-                GetTemplate();
-            }
+            currentPath = record.node.original.filePath;
+            Preview();
         }).on('delete_node.jstree', function (event, record) {
             if (!record.node.original.filePath) {
                 record.instance.refresh();
                 return
             }
-            abp.message.confirm(L('DeletionConfirmationMessage', record.node.text))
+            abp.message.confirm(l('Confirm the permanent deletion {0}', record.node.text))
                 .then(function (confirmed) {
                     if (confirmed && record.node.original.filePath) {
-                        Service.delete(record.node.original.filePath)
+                        templateService.delete(record.node.original.filePath)
                             .then(function () {
-                                abp.notify.info(L('SuccessfullyDeleted'));
+                                abp.notify.info(l('SuccessfullyDeleted'));
                             });
                     }
                     else {
@@ -154,25 +154,24 @@
         }).on('rename_node.jstree', function (event, record) {
             if (record.old == record.text) return
             var filePath = record.node.original.filePath;
-            debugger
             if (!filePath) {
                 var p_record = $('#jstree').jstree('get_node', record.node.parent)
                 var path = p_record.original.filePath + '\\' + record.text;
-                Service.create(path).done((res) => { GetTemplate(); })
+                templateService.create(path).done((res) => { GetTemplate(); })
                 //set node filePath
                 var originalData = record.node.original;
                 originalData.filePath = path;
                 record.node.original = originalData;
                 return
             }
-            Service.rename(filePath, record.text).done(() => {
+            templateService.rename(filePath, record.text).done(() => {
                 var originalData = record.node.original;
                 originalData.filePath = filePath.replace(record.old, record.text);
                 record.node.original = originalData;
             }).catch(() => { record.instance.refresh() });
         }).on('move_node.jstree', function (event, record) {
             var p_record = $('#jstree').jstree('get_node', record.parent)
-            Service.move(record.node.original.filePath, p_record.original.filePath).done((res) => {
+            templateService.move(record.node.original.filePath, p_record.original.filePath).done((res) => {
                 if (record.node.children.length == 0) {
                     var originalData = record.node.original;
                     originalData.filePath = res
@@ -185,8 +184,11 @@
             }).catch(() => { record.instance.refresh() });
         });
     }
-    
-    const options = {
+
+    /************************************************************************
+     * JSONEditor Configurations                                            *
+     ************************************************************************/
+    const jsonEditorOptions = {
         search: false,
         modes: ['tree', 'code'],
         onChangeText: (v) => {
@@ -200,12 +202,11 @@
             }
         }
     }
-
-    const editor = new JSONEditor(document.getElementById("jsoneditor"), options)
+    const jsonEditor = new JSONEditor(document.getElementById("jsoneditor"), jsonEditorOptions)
 
     /*
     
-    editor.options.templates = [{
+    jsonEditor.options.templates = [{
         text: 'Address',
         title: 'Insert a Address Node',
         field: 'AddressTemplate',
@@ -217,7 +218,148 @@
         }
     }]
     
-    editor.set(initialJson);
+    jsonEditor.set(initialJson);
     
     */
+
+    /************************************************************************
+     * DynamicTab Configurations                                            *
+     ************************************************************************/
+    function CreateTab(name) {
+        var id = "Tab" + name.replace(/[{}.@]/g, '_');
+        var tabHeader = id + "-tab";
+
+        if ($("#" + tabHeader).length > 0) {
+            $("#" + tabHeader)[0].click();
+            return;
+        }
+
+        var tabBtn = abp.utils.formatString('<li class="dynamic-tab nav-item" role="presentation"><a aria-controls="{0}" aria-selected="false" class="nav-link" data-bs-toggle="tab" href="#{0}" id="{0}-tab" role="tab" title="{2}">{1} <i class="fa fa-close" title="{3}" data-id="{0}"></i></a></li>', id, name, currentPath, l("Close"));
+
+        var tabContent = abp.utils.formatString('<div aria-labelledby="{0}-tab" class="dynamic-tab-content tab-pane fade" id="{0}" role="tabpanel"></div>', id, currentPath);
+
+        $("#Tabs").append(tabBtn);
+        $("#TabsContent").append(tabContent);
+
+        CreateMonacoEditor(id, name.split('.').pop());
+
+        $("#" + tabHeader)[0].click();
+    }
+
+    $(document).on('click', '.dynamic-tab > a .fa-close', function () {
+        var tab = $(this).parents('li');
+        var id = $(this).attr('data-id');
+        var currentTabId = tab.find('a').attr('href');
+        var filePath = tab.find('a').attr('title');
+        var preTab = tab.prev('li').find('a').attr('id');
+        var nextTab = tab.next('li').find('a').attr('id');
+
+        var contentDispose = (content) => {
+            content.dispose();
+            tab.remove();
+            $(currentTabId).remove();
+            nextTab ? $("#" + nextTab)[0].click() : $("#" + preTab)[0].click();
+            if (modelChangeList.indexOf(id) != -1) {
+                modelChangeList.splice(modelChangeList.indexOf(id), 1)
+            }
+        }
+
+        document.querySelectorAll('.dynamic-tab > a').forEach((element, index) => {
+            if (element.getAttribute('href') == currentTabId) {
+                var content = monaco.editor.getModels()[index];
+                if (modelChangeList.indexOf(id) == -1) {
+                    contentDispose(content);
+                } else {
+                    SaveChangeConfirm(l('MonacoEditorSaveChangeConfirmationMessage'))
+                        .then(function (confirmed) {
+                            if (confirmed === undefined) {
+                                return;
+                            }
+                            if (confirmed) {
+                                templateService.updateContent({ path: filePath, content: content.getValue() }).done((res) => {
+                                    contentDispose(content);
+                                }).fail(() => {
+                                    abp.notify.error(l('Save Failed'));
+                                })
+                            } else if (confirmed === false) {
+                                contentDispose(content);
+                            }
+                        });
+                }
+                return;
+            }
+        });
+    });
+
+    SaveChangeConfirm = function (title, callback) {
+
+        var userOpts = {
+            title: title,
+            showCancelButton: false,
+            showDenyButton: true
+        };
+
+        var opts = $.extend(
+            {},
+            abp.libs.sweetAlert.config['default'],
+            abp.libs.sweetAlert.config.confirm,
+            userOpts
+        );
+
+        return $.Deferred(function ($dfd) {
+            Swal.fire(opts).then(result => {
+                callback && callback(result.value);
+                $dfd.resolve(result.value);
+            })
+        });
+    };
+
+    /************************************************************************
+     * MonacoEditor Configurations                                          *
+     ************************************************************************/
+    let modelChangeList = [];
+    function CreateMonacoEditor(id, fileExtension) {
+        let languages = monaco.languages.getLanguages();
+        let language = languages.find(lang => lang.extensions?.includes('.' + fileExtension));
+
+        templateService.getContent(currentPath).done((res) => {
+            let model = monaco.editor.create(document.getElementById(id), {
+                acceptSuggestionOnCommitCharacter: true,
+                acceptSuggestionOnEnter: 'on',
+                accessibilitySupport: 'on',
+                autoClosingBrackets: 'always',
+                autoClosingDelete: 'always',
+                autoClosingOvertype: 'always',
+                autoClosingQuotes: 'always',
+                autoIndent: 'None',
+                automaticLayout: true,
+                codeLens: false,
+                value: res,
+                theme: 'vs-ligth',
+                fontSize: 14,
+                language: language?.id ?? 'liquid'
+            });
+
+            model.onDidChangeModelContent(function () {
+                if (modelChangeList.indexOf(id) == -1) {
+                    modelChangeList.push(id);
+                }
+            });
+
+            model.onKeyDown((e) => {
+                if (e.keyCode === 49 /** KeyCode.KeyS */ && e.ctrlKey) {
+                    var path = $("#" + id + "-tab").attr("title")
+                    templateService.updateContent({ path: path, content: model.getValue() }).done((res) => {
+                        abp.notify.success(l('Successfully Saved'))
+                        if (modelChangeList.indexOf(id) != -1) {
+                            modelChangeList.splice(modelChangeList.indexOf(id), 1)
+                        }
+                    }).fail(() => {
+                        abp.notify.error(l('Save Failed'));
+                    })
+                    e.preventDefault();
+                }
+            });
+        })
+    }
 });

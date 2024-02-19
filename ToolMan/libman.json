@@ -11,12 +11,12 @@
       "destination": "wwwroot/libs/highlight.js/"
     },
     {
-      "library": "monaco-editor@0.45.0",
-      "destination": "wwwroot/libs/monaco-editor/"
-    },
-    {
       "library": "jsoneditor@10.0.0",
       "destination": "wwwroot/libs/jsoneditor/"
+    },
+    {
+      "library": "monaco-editor@0.45.0",
+      "destination": "wwwroot/libs/monaco-editor/"
     }
   ]
 }

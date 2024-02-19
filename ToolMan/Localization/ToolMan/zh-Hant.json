@@ -27,14 +27,17 @@
     "TemplateContent": "模板内容",
     "Update": "更新",
     "Full Screen": "全屏",
-    "Confirm the permanent deletion": "確認永久刪除 {0} ？",
+    "Confirm the permanent deletion {0}": "確認永久刪除 {0} ？",
     "SuccessfullyDeleted": "删除成功",
+    "Successfully Saved": "保存成功",
+    "Save Failed": "保存失敗",
     "Refresh": "刷新",
     "Open All": "全部展開",
     "Close All": "全部收縮",
     "Template Render Error": "模板渲染錯誤",
     "Can only be moved to a folder": "只能移動到文件夾下",
     "Path error": "路徑錯誤",
-    "Template content is null or whiteSpace or global variable {{SKIP_GENERATE=true}}. No file be generated": "儅模板内容為IsNullOrWhiteSpace或全局變量 {{SKIP_GENERATE=true}} 時不生成任何文件"
+    "Template content is null or whiteSpace or global variable {{{0}=true}}. No file be generated": "儅模板内容為IsNullOrWhiteSpace或全局變量 {{{0}=true}} 時不生成任何文件",
+    "Edit": "編輯"
   }
 }

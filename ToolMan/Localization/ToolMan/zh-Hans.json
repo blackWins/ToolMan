@@ -27,14 +27,18 @@
     "TemplateContent": "模板内容",
     "Update": "更新",
     "Full Screen": "全屏",
-    "Confirm the permanent deletion": "确认永久删除 {0} ？",
+    "Confirm the permanent deletion {0}": "确认永久删除 {0} ？",
     "SuccessfullyDeleted": "删除成功",
+    "Successfully Saved": "保存成功",
+    "Save Failed": "保存失败",
     "Refresh": "刷新",
     "Open All": "全部展开",
     "Close All": "全部折叠",
     "Template Render Error": "模板渲染错误",
     "Can only be moved to a folder": "只能移动到文件夹下",
     "Path error": "路径错误",
-    "Template content is null or whiteSpace or global variable {{SKIP_GENERATE=true}}. No file be generated": "模板内容为空或全局变量 {{SKIP_GENERATE=true}} 时不生成任何文件"
+    "Template content is null or whiteSpace or global variable {{{0}=true}}. No file be generated": "模板内容为空或全局变量 {{{0}=true}} 时不生成任何文件",
+    "Edit": "编辑",
+    "MonacoEditorSaveChangeConfirmationMessage": "文件已修改是否保存"
   }
 }

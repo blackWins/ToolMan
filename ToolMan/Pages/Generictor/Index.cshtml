@@ -1,4 +1,7 @@
 ﻿@page
+@{
+    ViewBag.FluidLayout = true;
+}
 @model AbpHelper.Pages.Generictor.IndexModel
 @using ToolMan.Menus;
 @using Microsoft.AspNetCore.Mvc.Localization
@@ -8,7 +11,6 @@
 @inject IHtmlLocalizer<ToolManResource> L
 @inject IPageLayout PageLayout
 @{
-    PageLayout.Content.Title = L["Generictor"].Value;
     PageLayout.Content.BreadCrumb.Add(L["Menu:Generictor"].Value);
     PageLayout.Content.MenuItemName = ToolManMenus.Generictor;
 }
@@ -22,61 +24,84 @@
 @section scripts {
     <script src="~/libs/jsoneditor/jsoneditor.min.js"></script>
     <script src="~/libs/jstree/jstree.min.js"></script>
-    @* https://highlightjs.readthedocs.io/en/latest/api.html#highlight *@
     <script src="~/libs/highlight.js/highlight.min.js"></script>
+    <script src="~/libs/monaco-editor/min/vs/loader.js"></script>
     <abp-script src="/Pages/Generictor/Index.cshtml.js" />
 }
 
-<abp-card>
-    <abp-card-body>
-        <abp-row>
-            <abp-column size="_4">
-                <abp-tabs>
-                    <abp-tab title="@L["Templates"].Value">
-                        <abp-input asp-for="ViewModel.TemplatePath" />
-                        <div id="jstree" style="height:440px;overflow:scroll;"></div>
-                        <abp-button icon="refresh" id="RefreshBtn" text="@L["Refresh"].Value" />
-                        <abp-button icon="caret-down" id="OpenAllBtn" text="@L["Open All"].Value" />
-                        <abp-button icon="caret-right" id="CloseAllBtn" text="@L["Close All"].Value" />
-                    </abp-tab>
-                    <abp-tab title="@L["TemplateContent"].Value">
-                        <textarea id="Template" style="width:100%;height: 538px;"></textarea>
-                        <abp-row class="m-auto">
-                            <abp-button id="UpdateBtn" button-type="Secondary">@L["Update"]</abp-button>
+<div id="pannel-container" class="d-flex">
+    <pannel id="treePanel">
+        <abp-input asp-for="ViewModel.TemplatePath" />
+        <abp-button icon="refresh" id="RefreshBtn" text="@L["Refresh"].Value" />
+        <abp-button icon="caret-down" id="OpenAllBtn" text="@L["Open All"].Value" />
+        <abp-button icon="caret-right" id="CloseAllBtn" text="@L["Close All"].Value" />
+        <div id="jstree" style="overflow:scroll;"></div>
+    </pannel>
+    <div id="resizer">...</div>
+    <pannel style="flex-grow:1">
+        <abp-tabs name="Tabs">
+            <abp-tab title="@L["Options"].Value" name="Options">
+                <abp-row>
+                    <abp-column size="_6">
+                        <label>@L["Options"]</label>
+                        <abp-input asp-for="ViewModel.Options" />
+                        <div id="jsoneditor"></div>
+                    </abp-column>
+                    <abp-column size="_6">
+                        <abp-input asp-for="ViewModel.OutputPath" />
+                        <abp-row style="padding:0.3rem 0">
+                            <abp-button-group class="mr-2">
+                                <abp-button button-type="Primary" class="text-center" id="GenerateLButton">@L["All Generate"].Value</abp-button>
+                                <abp-button button-type="Primary" class="text-center" id="GenerateRButton">@L["Only Preview Item"].Value</abp-button>
+                            </abp-button-group>
                         </abp-row>
-                    </abp-tab>
-                </abp-tabs>
-            </abp-column>
-            <abp-column size="_4">
-                <abp-input asp-for="ViewModel.OutputPath" />
-                <label>@L["Options"]</label>
-                <div id="jsoneditor" style="width: 100%; height: 510px;"></div>
-                <abp-row style="padding-top:0.3rem">
-                    <abp-button-group class="mr-2">
-                        <abp-button button-type="Primary" class="text-center" id="GenerateLButton">@L["All Generate"].Value</abp-button>
-                        <abp-button button-type="Primary" class="text-center" id="GenerateRButton">@L["Only Preview Item"].Value</abp-button>
-                    </abp-button-group>
-                </abp-row>
-                <abp-input asp-for="ViewModel.Options" />
-            </abp-column>
-            <abp-column size="_4">
-                <abp-tabs>
-                    <abp-tab title="@L["Preview"].Value">
-                        <pre style="margin-bottom:0"><code style="height:540px; width:100%;overflow:scroll;" id="Preview"></code></pre>
+                        <pre style="margin-bottom:0"><code id="Preview"></code></pre>
                         <abp-row style="padding-top:0.3rem" class="m-auto">
                             <abp-button button-type="Secondary" data-bs-toggle="modal" data-bs-target="#PreviewModal">@L["Full Screen"]</abp-button>
                         </abp-row>
-                    </abp-tab>
-                </abp-tabs>
-            </abp-column>
-        </abp-row>
-    </abp-card-body>
-</abp-card>
-
+                    </abp-column>
+                </abp-row>
+            </abp-tab>
+        </abp-tabs>
+    </pannel>
+</div>
 <abp-modal centered="true" scrollable="true" size="Fullscreen" id="PreviewModal">
-    <abp-modal-header title="@L["Preview"].Value"></abp-modal-header>
     <abp-modal-body>
-        <pre><code id="Preview_modal" class="hljs"></code></pre>
+        <div class="hljs" style="width: 100%; height: 89vh; overflow: scroll;">
+            <pre><code id="Preview_modal" class="hljs"></code></pre>
+        </div>
     </abp-modal-body>
     <abp-modal-footer buttons="@(AbpModalButtons.Close)"></abp-modal-footer>
 </abp-modal>
+
+<script>
+    setTimeout(function () {
+        var resizer = document.getElementById("resizer");
+        var treePanel = document.getElementById("treePanel");
+
+        var setHeight = function (innerHeight) {
+            document.getElementById("jstree").style.height = (innerHeight - 244) + "px";
+            document.getElementById("jsoneditor").style.height = (innerHeight - 170) + "px";
+            document.getElementById("Preview").style.height = (innerHeight - 310) + "px";
+        }
+        window.addEventListener('resize', (e) => { setHeight(window.innerHeight) })
+        setHeight(window.innerHeight);
+
+        resizer.addEventListener("mousedown", function (e) {
+            e.preventDefault();
+            document.addEventListener("mousemove", mousemove);
+            document.addEventListener("mouseup", mouseup);
+        });
+
+        function mousemove(e) {
+            var dx = e.clientX - resizer.clientWidth - 15;
+            treePanel.style.width = dx + "px";
+        }
+
+        function mouseup() {
+            document.removeEventListener("mousemove", mousemove);
+            document.removeEventListener("mouseup", mouseup);
+        }
+    }, 200)
+
+</script>

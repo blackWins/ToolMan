@@ -1,0 +1,61 @@
+﻿@page
+@using Microsoft.AspNetCore.Mvc.Localization
+@using ToolMan.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Modal;
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@inject IHtmlLocalizer<ToolManResource> L
+@model ToolMan.Pages.Generictor.TemplateContentModalModel
+@{
+    Layout = null;
+}
+<style>
+    .modal-xl1 {
+        --bs-modal-width: 95vw;
+    }
+</style>
+<abp-modal size="Fullscreen">
+    <abp-modal-header title="@L["Edit"].Value @System.IO.Path.GetFileName(Model.FilePath)"></abp-modal-header>
+    <abp-modal-body>
+        <div id="container" style="width: 100%; height: 82vh;"></div>
+    </abp-modal-body>
+    <abp-modal-footer buttons="@(AbpModalButtons.Cancel|AbpModalButtons.Save)"></abp-modal-footer>
+</abp-modal>
+<script>
+    setTimeout(function () {
+        toolMan.services.template.getContent('@Html.Raw(Model.FilePath.Replace("\\", "\\\\"))').done((res) => {
+            monaco.editor.create(document.getElementById('container'), {
+                acceptSuggestionOnCommitCharacter: true,
+                acceptSuggestionOnEnter: 'on',
+                accessibilityPageSize: 10,
+                accessibilitySupport: 'on',
+                autoClosingBrackets: 'always',
+                autoClosingDelete: 'always',
+                autoClosingOvertype: 'always',
+                autoClosingQuotes: 'always',
+                autoIndent: 'None',
+                automaticLayout: true,
+                codeLens: false,
+                value: res,
+                theme: 'vs-dark',
+                fontSize: 14,
+                language: 'liquid'
+            });
+        })
+
+    }, 250)
+
+    $(document).on('click', '#SaveBtn', function () {
+        var content = monaco.editor.getModels()[0].getValue();
+
+        return;
+        toolMan.services.template.setContent('@Html.Raw(Model.FilePath.Replace("\\", "\\\\"))', content).done((res) => {
+            if (res.success) {
+                abp.notify.success(res.message);
+                $('#PreviewModal').modal('hide');
+            } else {
+                abp.notify.error(res.message);
+            }
+        })
+    })
+
+</script>
