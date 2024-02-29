@@ -38,6 +38,12 @@
     "Can only be moved to a folder": "只能移動到文件夾下",
     "Path error": "路徑錯誤",
     "Template content is null or whiteSpace or global variable {{{0}=true}}. No file be generated": "儅模板内容為IsNullOrWhiteSpace或全局變量 {{{0}=true}} 時不生成任何文件",
-    "Edit": "編輯"
+    "Edit": "編輯",
+    "New": "新建",
+    "Save to disk": "保存到本地",
+    "Open from disk": "從磁盤打開",
+    "Refresh preview": "刷新預覽",
+    "Invalid JSON": "無效的 JSON",
+    "Clear the editor": "清空編輯器"
   }
 }

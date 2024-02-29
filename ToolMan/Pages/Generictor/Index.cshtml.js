@@ -9,16 +9,23 @@
 
     $('#GenerateLButton').click(function (e) {
         Generate($("#ViewModel_TemplatePath").val());
+        localStorage.setItem("outPutPath", $("#ViewModel_OutputPath").val());
     })
 
     $('#GenerateRButton').click(function (e) {
         Generate(currentPath);
+        localStorage.setItem("outPutPath", $("#ViewModel_OutputPath").val());
     })
 
+    if (localStorage.getItem("outPutPath")) {
+        $("#ViewModel_OutputPath").val(localStorage.getItem("outPutPath"));
+    }
+
     function Generate(path) {
+        var relativeDirectory = path.replace($("#ViewModel_TemplatePath").val(), "");
         var input = {
             templatePath: path,
-            outputPath: $("#ViewModel_OutputPath").val(),
+            outputPath: $("#ViewModel_OutputPath").val() + relativeDirectory,
             options: $("#ViewModel_Options").val()
         }
         if (input.templatePath == '') {
@@ -31,16 +38,14 @@
         }
 
         toolMan.services.genericGenerate.run(input).done((res) => {
-            abp.notify.info(l('Generate Succesful'))
+            if (res) {
+                abp.notify.info(l('Generate Succesful'))
+            }
+            else {
+                abp.notify.error(l('Generate Failed'))
+            }
         })
     }
-
-    $("#UpdateBtn").click(function (e) {
-        templateService.updateContent({ path: currentPath, content: $("#Template").val() }).done((res) => {
-            abp.notify.info(l('Update Succesful'))
-            Preview();
-        })
-    })
 
     $("#ViewModel_Options").on('change', Preview)
 
@@ -76,9 +81,19 @@
     $("#RefreshBtn").click(function (e) {
         LoadTree();
     })
-    $("#ViewModel_TemplatePath").on('input', function (e) {
+    $("#ViewModel_TemplatePath").keydown(function (event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            localStorage.setItem("templatePath", event.currentTarget.value);
+            location.reload();
+        }
+    });
+
+    if (localStorage.getItem("templatePath")) {
+        $("#ViewModel_TemplatePath").val(localStorage.getItem("templatePath"));
         LoadTree();
-    })
+    }
+
 
     function LoadTree() {
         var path = $("#ViewModel_TemplatePath").val();
@@ -118,7 +133,6 @@
                             }
                         }
                     };
-
                     items.create.label = l(items.create.label)
                     items.rename.label = l(items.rename.label)
                     items.remove.label = l(items.remove.label)
@@ -131,6 +145,14 @@
                     return items
                 }
             },
+        }).on('dblclick.jstree', (event) => {
+            var refTree = $.jstree.reference(event.target);
+            var node = refTree.get_node(event.target);
+            currentPath = node.original.filePath;
+            if (node.icon !== 'jstree-folder') {
+                var name = currentPath.split(/\\/).pop();
+                CreateTab(name);
+            }
         }).on('select_node.jstree', (event, record) => {
             currentPath = record.node.original.filePath;
             Preview();
@@ -191,18 +213,66 @@
     const jsonEditorOptions = {
         search: false,
         modes: ['tree', 'code'],
-        onChangeText: (v) => {
-            try {
-                var json = JSON.parse(v);
-                if (json[''] === '') return;
+        onChangeText: (v) => { }
+    }
 
-                $("#ViewModel_Options").val(JSON.stringify(json));
-                $("#ViewModel_Options").trigger("change")
-            } catch (err) {
+    const jsonEditor = new JSONEditor(document.getElementById("jsoneditor"), jsonEditorOptions)
+
+    if (localStorage.getItem("jsonEditor")) {
+        setTimeout(() => {
+            jsonEditor.set(JSON.parse(localStorage.getItem("jsonEditor")));
+            $("#jse-bar-refresh").click();
+        }, 200);
+    }
+
+    setInterval(() => {
+        if (localStorage.getItem("jsonEditor") !== jsonEditor.getText()) {
+            localStorage.setItem("jsonEditor", jsonEditor.getText());
+        }
+    }, 2000);
+
+    $("#jse-bar-new").click(function (e) {
+        abp.message.confirm(l('Clear the editor'), function (confirmed) {
+            if (confirmed) { jsonEditor.set({}); }
+        });
+
+    })
+
+    $("#jse-bar-save").click(function (e) {
+        var blob = new Blob([jsonEditor.getText()], { type: "text/plain;charset=utf-8" });
+        var downloadLink = document.createElement("a");
+        downloadLink.download = "options.json";
+        downloadLink.href = window.URL.createObjectURL(blob);
+        downloadLink.target = "_blank";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    })
+
+    $("#jse-bar-open").click(function (e) {
+        $("#jse-bar-open-file").val('')
+        $("#jse-bar-open-file").click();
+    })
+
+    $("#jse-bar-open-file").on("change", (e) => {
+        var file = e.target.files[0];
+        var reader = new FileReader();
+        reader.readAsText(file, "UTF-8");
+        reader.onload = (e) => {
+            try {
+                jsonEditor.set(JSON.parse(e.target.result));
+                $("#jse-bar-refresh").click();
+                abp.notify.success();
+            }
+            catch (err) {
+                abp.notify.error(l('Invalid JSON'));
             }
         }
-    }
-    const jsonEditor = new JSONEditor(document.getElementById("jsoneditor"), jsonEditorOptions)
+    });
+    $("#jse-bar-refresh").click(function (e) {
+        $("#ViewModel_Options").val(jsonEditor.getText());
+        $("#ViewModel_Options").trigger("change")
+    })
 
     /*
     
@@ -226,7 +296,7 @@
      * DynamicTab Configurations                                            *
      ************************************************************************/
     function CreateTab(name) {
-        var id = "Tab" + name.replace(/[{}.@]/g, '_');
+        var id = "Tab" + name.replace(/[{}.@\s]/g, '_');
         var tabHeader = id + "-tab";
 
         if ($("#" + tabHeader).length > 0) {

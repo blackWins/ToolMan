@@ -35,7 +35,7 @@
         <abp-button icon="refresh" id="RefreshBtn" text="@L["Refresh"].Value" />
         <abp-button icon="caret-down" id="OpenAllBtn" text="@L["Open All"].Value" />
         <abp-button icon="caret-right" id="CloseAllBtn" text="@L["Close All"].Value" />
-        <div id="jstree" style="overflow:scroll;"></div>
+        <div id="jstree" style="overflow:scroll;padding-bottom: 0.5rem;"></div>
     </pannel>
     <div id="resizer">...</div>
     <pannel style="flex-grow:1">
@@ -45,6 +45,13 @@
                     <abp-column size="_6">
                         <label>@L["Options"]</label>
                         <abp-input asp-for="ViewModel.Options" />
+                        <div class="text-end p-1 bg-primary">
+                            <button id="jse-bar-new" class="btn btn-sm btn-primary fa fa-file" title="@L["New"].Value"></button>
+                            <button id="jse-bar-save" class="btn btn-sm btn-primary fa fa-download" title="@L["Save to disk"].Value"></button>
+                            <button id="jse-bar-open" class="btn btn-sm btn-primary fa fa-folder-open" title="@L["Open from disk"].Value"></button>
+                            <input id="jse-bar-open-file" class="d-none" type="file" accept=".json">
+                            <button id="jse-bar-refresh" class="btn btn-sm btn-primary fa fa-refresh" title="@L["Refresh preview"].Value"></button>
+                        </div>
                         <div id="jsoneditor"></div>
                     </abp-column>
                     <abp-column size="_6">
@@ -81,7 +88,7 @@
 
         var setHeight = function (innerHeight) {
             document.getElementById("jstree").style.height = (innerHeight - 244) + "px";
-            document.getElementById("jsoneditor").style.height = (innerHeight - 170) + "px";
+            document.getElementById("jsoneditor").style.height = (innerHeight - 206) + "px";
             document.getElementById("Preview").style.height = (innerHeight - 310) + "px";
         }
         window.addEventListener('resize', (e) => { setHeight(window.innerHeight) })

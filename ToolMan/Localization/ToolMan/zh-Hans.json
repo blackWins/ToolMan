@@ -39,6 +39,12 @@
     "Path error": "路径错误",
     "Template content is null or whiteSpace or global variable {{{0}=true}}. No file be generated": "模板内容为空或全局变量 {{{0}=true}} 时不生成任何文件",
     "Edit": "编辑",
-    "MonacoEditorSaveChangeConfirmationMessage": "文件已修改是否保存"
+    "MonacoEditorSaveChangeConfirmationMessage": "文件已修改是否保存",
+    "New": "新建",
+    "Save to disk": "保存到本地",
+    "Open from disk": "从磁盘打开",
+    "Refresh preview": "刷新预览",
+    "Invalid JSON": "无效的 JSON",
+    "Clear the editor": "清空编辑器"
   }
 }
