@@ -1,18 +1,26 @@
-﻿namespace ToolMan.Services.Dtos
+﻿using Toolkit;
+
+namespace ToolMan.Services.Dtos
 {
     public class DirectoryTreeDto
     {
-        public DirectoryTreeDto(string filePath)
+        public DirectoryTreeDto(string filePath, bool isFolder)
         {
             FilePath = filePath;
-            Text = Path.GetFileName(filePath) ?? Path.GetDirectoryName(filePath);
-            if (!Path.HasExtension(Text) || Text.StartsWith("{{") && Text.EndsWith("}}"))
+            Text = Path.GetFileName(filePath);
+            if (isFolder)
             {
                 Icon = "jstree-folder";
-                return;
             }
+            else if (Text!.StartsWith("$"))
+            {
+                Icon = "fa fa-link";
+            }
+            else
+            {
 
-            Icon = Text.StartsWith("@") ? "fa fa-cubes" : "jstree-file";
+                Icon = Text.StartsWith("@") ? "fa fa-cubes" : "jstree-file";
+            }
         }
 
         public string? Text { get; private set; }

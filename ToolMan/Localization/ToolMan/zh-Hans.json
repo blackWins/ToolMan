@@ -37,7 +37,7 @@
     "Template Render Error": "模板渲染错误",
     "Can only be moved to a folder": "只能移动到文件夹下",
     "Path error": "路径错误",
-    "Template content is null or whiteSpace or global variable {{{0}=true}}. No file be generated": "模板内容为空或全局变量 {{{0}=true}} 时不生成任何文件",
+    "Template content is null or whiteSpace or global variable {{{0}=true}}. No file be generated": "模板内容为空或全局变量 {{{0}=true}} 时不生成任何文件。",
     "Edit": "编辑",
     "MonacoEditorSaveChangeConfirmationMessage": "文件已修改是否保存",
     "New": "新建",
@@ -45,6 +45,8 @@
     "Open from disk": "从磁盘打开",
     "Refresh preview": "刷新预览",
     "Invalid JSON": "无效的 JSON",
-    "Clear the editor": "清空编辑器"
+    "Clear the editor": "清空编辑器",
+    "Files starting with $ in the template path are used as the corresponding file under the mapping output path by default.": "模板路径下以$开头的文件将用作映射输出路径下的相应文件。",
+    "template path .ToolMan does not output folders for reservation.": "模板路径下.ToolMan为保留文件夹不会进行输出。"
   }
 }

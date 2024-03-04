@@ -19,15 +19,17 @@ namespace ToolMan.Services
         {
             var model = JsonConvert.DeserializeObject<Dictionary<string, object>>(input.Options ?? "{}");
 
-            var templatePath = input.TemplatePath.Split('.');
-
-            if (templatePath.Length > 1 && !templatePath.Last().Contains("}}"))
+            if (Directory.Exists(input.TemplatePath))
             {
-                await _generator.RenderAsync(new[] { input.TemplatePath }, Path.GetDirectoryName(input.TemplatePath)!, input.OutputPath, model);
+                await _generator.RenderAsync(input.TemplatePath, input.OutputPath, model!);
             }
             else
             {
-                await _generator.RenderAsync(input.TemplatePath, input.OutputPath, model);
+                await _generator.RenderAsync(
+                    [input.TemplatePath],
+                    Path.GetDirectoryName(input.TemplatePath)!,
+                    Path.Exists(input.OutputPath) ? input.OutputPath : Path.GetDirectoryName(input.OutputPath),
+                    model!);
             }
 
             return true;

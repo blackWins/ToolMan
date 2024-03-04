@@ -296,7 +296,7 @@
      * DynamicTab Configurations                                            *
      ************************************************************************/
     function CreateTab(name) {
-        var id = "Tab" + name.replace(/[{}.@\s]/g, '_');
+        var id = "Tab" + name.replace(/[{}.@$\s]/g, '_');
         var tabHeader = id + "-tab";
 
         if ($("#" + tabHeader).length > 0) {

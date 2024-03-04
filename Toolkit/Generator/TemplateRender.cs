@@ -15,11 +15,12 @@ namespace Toolkit.Generator
         public virtual async Task<string> RenderFromFileAsync(
             [NotNull] string templateFullPath,
             [CanBeNull] object? model = null,
-            [CanBeNull] Dictionary<string, object>? globalContext = null)
+            [CanBeNull] Dictionary<string, object>? globalContext = null,
+            [CanBeNull] string? includeTemplatePath = null)
         {
             var templateContent = File.ReadAllText(templateFullPath);
 
-            return await RenderAsync(templateContent, model, globalContext, templateFullPath);
+            return await RenderAsync(templateContent, model, globalContext, includeTemplatePath ?? templateFullPath);
         }
 
         public virtual async Task<string> RenderAsync(
@@ -37,8 +38,9 @@ namespace Toolkit.Generator
 
             if (!templateContent.IsNullOrWhiteSpace())
             {
-                context.TemplateLoader = new TemplateLoader(Path.HasExtension(includeTemplatePath) ? Path.GetDirectoryName(includeTemplatePath) : includeTemplatePath!);
+                context.TemplateLoader = new TemplateLoader(Directory.Exists(includeTemplatePath) ? includeTemplatePath! : Path.GetDirectoryName(includeTemplatePath));
             }
+
             var content = (await Template
                    .Parse(templateContent)
                    .RenderAsync(context)).Replace("\r\n", Environment.NewLine);
@@ -60,6 +62,7 @@ namespace Toolkit.Generator
             var scriptObject = new ScriptObject();
 
             scriptObject.Import(globalContext);
+            scriptObject.SetValue("abp", new AbpScriptObject(), true);
 
             if (model != null)
             {

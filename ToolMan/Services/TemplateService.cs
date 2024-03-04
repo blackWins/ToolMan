@@ -100,7 +100,7 @@ namespace ToolMan.Services
 
         public async Task<DirectoryTreeDto> GetDirectoryTreeAsync(string path)
         {
-            if (!Path.Exists(path)) return new DirectoryTreeDto(L["Path error"]);
+            if (!Path.Exists(path)) return new DirectoryTreeDto(L["Path error"], true);
 
             var dto = BuildDirectoryFileTree(path.TrimEnd());
 
@@ -109,7 +109,7 @@ namespace ToolMan.Services
 
         private static DirectoryTreeDto BuildDirectoryFileTree(string directory)
         {
-            var node = new DirectoryTreeDto(directory);
+            var node = new DirectoryTreeDto(directory, true);
 
             foreach (var dir in Directory.GetDirectories(directory).Order())
             {
@@ -118,7 +118,7 @@ namespace ToolMan.Services
 
             foreach (var file in Directory.GetFiles(directory).Order())
             {
-                node.AddChild(new DirectoryTreeDto(file));
+                node.AddChild(new DirectoryTreeDto(file, false));
             }
 
             return node;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.DependencyInjection;
@@ -22,7 +23,7 @@ namespace Toolkit.Generator
 
             //skip contain @ symbol path
             var files = dir.GetFiles(searchPattern, SearchOption.AllDirectories)
-                .Where(x => !x.FullName.Contains("@"))
+                .Where(x => !x.FullName.Contains(TookitConsts.PRESERVE_PATH))
                 .Select(x => x.FullName)
                 .ToArray();
 
@@ -33,19 +34,48 @@ namespace Toolkit.Generator
         {
             foreach (var file in files)
             {
+                var targetFullFileName = await _templateRender.RenderAsync(file.Replace(templateDirectoryPath, targetPath), model);
+
+                var targetFileName = Path.GetFileName(targetFullFileName);
+
+                targetFullFileName = targetFullFileName.Replace("@", string.Empty);
+
+                if (Path.GetDirectoryName(file).Contains("@") && !targetFileName.StartsWith("@") && File.Exists(targetFullFileName)) continue;
+
+                if (targetFileName.StartsWith("$"))
+                {
+                    await RenderBySearchPatternAsync(
+                        Path.GetDirectoryName(targetFullFileName),
+                        targetFileName.Replace("$", "*"),
+                        Path.GetDirectoryName(file),
+                        model);
+
+                    continue;
+                }
+
                 var content = await _templateRender.RenderFromFileAsync(file, model);
 
                 if (content.IsNullOrWhiteSpace()) continue;
 
-                var targetFileName = file
-                    .Replace(templateDirectoryPath, targetPath)
-                    .ToString();
+                Directory.CreateDirectory(Path.GetDirectoryName(targetFullFileName));
 
-                targetFileName = await _templateRender.RenderAsync(targetFileName, model);
+                await File.WriteAllTextAsync(targetFullFileName, content, Encoding.UTF8);
+            }
+        }
 
-                Directory.CreateDirectory(Path.GetDirectoryName(targetFileName));
+        private async Task RenderBySearchPatternAsync(string searchPath, string searchPattern, string includeFilePath, object model)
+        {
+            var targetFiles = Directory.GetFiles(searchPath, searchPattern);
 
-                await File.WriteAllTextAsync(targetFileName, content, Encoding.UTF8);
+            if (!targetFiles.Any()) return;
+
+            foreach (var item in targetFiles)
+            {
+                var content = await _templateRender.RenderFromFileAsync(item, model, includeTemplatePath: includeFilePath);
+
+                if (content.IsNullOrWhiteSpace()) continue;
+
+                await File.WriteAllTextAsync(item, content, Encoding.UTF8);
             }
         }
     }
