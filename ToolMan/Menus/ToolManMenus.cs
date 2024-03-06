@@ -6,6 +6,6 @@ public class ToolManMenus
     public const string Home = Prefix + ".Home";
 
     public const string Generictor = Prefix + ".Generictor";
-    //Add your menu items here...
+    public const string CSharp = Prefix + ".CSharp";
 
 }

@@ -46,6 +46,9 @@
     "Invalid JSON": "無效的 JSON",
     "Clear the editor": "清空編輯器",
     "Files starting with $ in the template path are used as the corresponding file under the mapping output path by default.": "範本路徑中以$開頭的檔將用作映射輸出路徑下的相應檔",
-    "template path .ToolMan does not output folders for reservation.": "樣本路徑中.ToolMan為保留資料夾不會進行輸出"
+    "Template path .ToolMan does not output folders for reservation.": "樣本路徑中.ToolMan為保留資料夾不會進行輸出",
+    "The EntityInfo node has been updated": "entityInfo 節點已更新",
+    "Used to quickly populate the template EntityInfo parameter": "用於快速填充範本 entityInfo 參數",
+    "Fill in the file path and press Enter to confirm": "填入文件路徑，回車鍵確認"
   }
 }

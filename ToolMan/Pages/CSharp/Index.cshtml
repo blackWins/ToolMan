@@ -1,8 +1,9 @@
 ﻿@page
+@model ToolMan.Pages.CSharp.IndexModel
 @{
     ViewBag.FluidLayout = true;
 }
-@model AbpHelper.Pages.Generictor.IndexModel
+
 @using ToolMan.Menus;
 @using Microsoft.AspNetCore.Mvc.Localization
 @using ToolMan.Localization
@@ -11,12 +12,12 @@
 @inject IHtmlLocalizer<ToolManResource> L
 @inject IPageLayout PageLayout
 @{
-    PageLayout.Content.BreadCrumb.Add(L["Menu:Generictor"].Value);
-    PageLayout.Content.MenuItemName = ToolManMenus.Generictor;
+    PageLayout.Content.BreadCrumb.Add(L["Menu:CSharp"].Value);
+    PageLayout.Content.MenuItemName = ToolManMenus.CSharp;
 }
 
 @section styles {
-    <abp-style src="/Pages/Generictor/Index.cshtml.css" />
+    <abp-style src="/Pages/CSharp/Index.cshtml.css" />
     <link href="~/libs/jstree/themes/default/style.min.css" rel="stylesheet" />
     <link href="~/libs/highlight.js/styles/vs2015.min.css" rel="stylesheet" />
     <link href="~/libs/jsoneditor/jsoneditor.min.css" rel="stylesheet" />
@@ -26,7 +27,7 @@
     <script src="~/libs/jstree/jstree.min.js"></script>
     <script src="~/libs/highlight.js/highlight.min.js"></script>
     <script src="~/libs/monaco-editor/min/vs/loader.js"></script>
-    <abp-script src="/Pages/Generictor/Index.cshtml.js" />
+    <abp-script src="/Pages/CSharp/Index.cshtml.js" />
 }
 
 <div id="pannel-container" class="d-flex">
@@ -43,7 +44,7 @@
             <abp-tab title="@L["Options"].Value" name="Options">
                 <abp-row>
                     <abp-column size="_6">
-                        <label>@L["Options"]</label>
+                        <abp-input asp-for="EntityInfo" />
                         <abp-input asp-for="ViewModel.Options" />
                         <div class="text-end p-1 bg-primary">
                             <button id="jse-bar-new" class="btn btn-sm btn-primary fa fa-file" title="@L["New"].Value"></button>
@@ -86,7 +87,7 @@
 
         var setHeight = function (innerHeight) {
             document.getElementById("jstree").style.height = (innerHeight - 244) + "px";
-            document.getElementById("jsoneditor").style.height = (innerHeight - 206) + "px";
+            document.getElementById("jsoneditor").style.height = (innerHeight - 299) + "px";
             document.getElementById("Preview").style.height = (innerHeight - 310) + "px";
         }
         window.addEventListener('resize', (e) => { setHeight(window.innerHeight) })

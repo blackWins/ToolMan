@@ -38,6 +38,15 @@ public class ToolManMenuContributor : IMenuContributor
            )
        );
 
+        context.Menu.Items.Add(
+           new ApplicationMenuItem(
+               ToolManMenus.CSharp,
+               l["Menu:CSharp"],
+               "/CSharp",
+               icon: "fas fa-code"
+           )
+       );
+
         return Task.CompletedTask;
     }
 }
