@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Newtonsoft.Json.Linq;
 using Scriban;
 using Scriban.Runtime;
-using Volo.Abp;
 using Volo.Abp.DependencyInjection;
 
 namespace Toolkit.Generator
@@ -14,7 +14,7 @@ namespace Toolkit.Generator
     {
         public virtual async Task<string> RenderFromFileAsync(
             [NotNull] string templateFullPath,
-            [CanBeNull] object? model = null,
+            [CanBeNull] JObject? model = null,
             [CanBeNull] Dictionary<string, object>? globalContext = null,
             [CanBeNull] string? includeTemplatePath = null)
         {
@@ -25,7 +25,7 @@ namespace Toolkit.Generator
 
         public virtual async Task<string> RenderAsync(
             [NotNull] string templateContent,
-            [CanBeNull] object? model = null,
+            [CanBeNull] JObject? model = null,
             [CanBeNull] Dictionary<string, object>? globalContext = null,
             [CanBeNull] string? includeTemplatePath = null)
         {
@@ -55,7 +55,7 @@ namespace Toolkit.Generator
             return content;
         }
 
-        protected virtual TemplateContext CreateScribanTemplateContext(Dictionary<string, object> globalContext, object? model = null)
+        protected virtual TemplateContext CreateScribanTemplateContext(Dictionary<string, object> globalContext, JObject? model = null)
         {
             var context = new TemplateContext();
 
@@ -66,7 +66,7 @@ namespace Toolkit.Generator
 
             if (model != null)
             {
-                scriptObject.Import(model, renamer: member => member.Name);
+                scriptObject.Import(ConvertFromJson(model), renamer: member => member.Name);
                 context.MemberRenamer = member => member.Name;
             }
 
@@ -75,5 +75,51 @@ namespace Toolkit.Generator
 
             return context;
         }
+
+        protected virtual ScriptObject ConvertFromJson(JObject element)
+        {
+            var obj = new ScriptObject();
+            foreach (var prop in element.Properties())
+            {
+                if (prop.Value.Type == JTokenType.Object)
+                {
+                    obj[prop.Name] = ConvertFromJson(prop.Value.ToObject<JObject>()!);
+                    continue;
+                }
+
+                obj[prop.Name] = ConvertFromJson(prop.Value);
+            }
+            return obj;
+        }
+
+        protected virtual object ConvertFromJson(JToken token)
+        {
+            switch (token.Type)
+            {
+                case JTokenType.Array:
+                    var array = new ScriptArray();
+                    foreach (var nestedElement in token.Children())
+                    {
+                        array.Add(ConvertFromJson(nestedElement));
+                    }
+                    return array;
+                case JTokenType.String:
+                    return token.ToString();
+                case JTokenType.Integer:
+                    return token.ToObject<int>();
+                case JTokenType.Float:
+                    return token.ToObject<double>();
+                case JTokenType.Boolean:
+                    return token.ToObject<bool>();
+                case JTokenType.Date:
+                    return token.ToObject<DateTime>();
+                case JTokenType.Undefined:
+                case JTokenType.Null:
+                    return null;
+                default:
+                    return token;
+            }
+        }
+
     }
 }

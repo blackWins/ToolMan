@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using Volo.Abp.DependencyInjection;
 
 namespace Toolkit.Generator
@@ -17,7 +17,7 @@ namespace Toolkit.Generator
             _templateRender = templateRender;
         }
 
-        public virtual async Task RenderAsync(string templateDirectoryPath, string targetPath, object model, string searchPattern = "*.*")
+        public virtual async Task RenderAsync(string templateDirectoryPath, string targetPath, JObject model, string searchPattern = "*.*")
         {
             DirectoryInfo dir = new DirectoryInfo(templateDirectoryPath);
 
@@ -30,7 +30,7 @@ namespace Toolkit.Generator
             await RenderAsync(files, templateDirectoryPath, targetPath, model);
         }
 
-        public virtual async Task RenderAsync(string[] files, string templateDirectoryPath, string targetPath, object model)
+        public virtual async Task RenderAsync(string[] files, string templateDirectoryPath, string targetPath, JObject model)
         {
             foreach (var file in files)
             {
@@ -63,7 +63,7 @@ namespace Toolkit.Generator
             }
         }
 
-        private async Task RenderBySearchPatternAsync(string searchPath, string searchPattern, string includeFilePath, object model)
+        private async Task RenderBySearchPatternAsync(string searchPath, string searchPattern, string includeFilePath, JObject model)
         {
             var targetFiles = Directory.GetFiles(searchPath, searchPattern);
 

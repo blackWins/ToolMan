@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Toolkit.Generator;
 using ToolMan.Services.Dtos;
 using Volo.Abp.Application.Services;
@@ -17,7 +18,7 @@ namespace ToolMan.Services
 
         public async Task<bool> RunAsync(GenericGenerateDto input)
         {
-            var model = JsonConvert.DeserializeObject<Dictionary<string, object>>(input.Options ?? "{}");
+            var model = JsonConvert.DeserializeObject<JObject>(input.Options ?? "{}");
 
             if (Directory.Exists(input.TemplatePath))
             {
@@ -28,7 +29,7 @@ namespace ToolMan.Services
                 await _generator.RenderAsync(
                     [input.TemplatePath],
                     Path.GetDirectoryName(input.TemplatePath)!,
-                    Path.Exists(input.OutputPath) ? input.OutputPath : Path.GetDirectoryName(input.OutputPath),
+                    Path.Exists(input.OutputPath) ? input.OutputPath! : Path.GetDirectoryName(input.OutputPath)!,
                     model!);
             }
 

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Toolkit.Generator;
 using ToolMan.Localization;
 using ToolMan.Services.Dtos;
@@ -146,7 +147,7 @@ namespace ToolMan.Services
 
             if (!Path.HasExtension(filename)) return string.Empty;
 
-            Dictionary<string, object>? model = input.Options.IsNullOrWhiteSpace() ? null : JsonConvert.DeserializeObject<Dictionary<string, object>>(input.Options!);
+            var model = JsonConvert.DeserializeObject<JObject>(input.Options ?? "{}");
 
             try
             {
