@@ -136,7 +136,7 @@
                     items.create.label = l(items.create.label)
                     items.rename.label = l(items.rename.label)
                     items.remove.label = l(items.remove.label)
-                    if (arr.length > 1 && arr[arr.length - 1].indexOf('}}') == -1) {
+                    if (node.icon !== 'jstree-folder' && arr.length > 1 && arr[arr.length - 1].indexOf('}}') == -1) {
                         delete items.create;
                     }
                     else {
