@@ -23,7 +23,7 @@ namespace Toolkit.Generator
 
             //skip contain @ symbol path
             var files = dir.GetFiles(searchPattern, SearchOption.AllDirectories)
-                .Where(x => !x.FullName.Contains(TookitConsts.PRESERVE_PATH))
+                .Where(x => !x.FullName.Contains(TookitConsts.PRESERVE_PATH) && !x.FullName.Contains("@"))
                 .Select(x => x.FullName)
                 .ToArray();
 
