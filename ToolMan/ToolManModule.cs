@@ -1,6 +1,5 @@
 ﻿using Microsoft.OpenApi.Models;
 using Toolkit;
-using ToolMan.Data;
 using ToolMan.Localization;
 using ToolMan.Menus;
 using Volo.Abp;
@@ -14,18 +13,13 @@ using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Autofac;
 using Volo.Abp.AutoMapper;
-using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore.Sqlite;
 using Volo.Abp.Localization;
 using Volo.Abp.Localization.ExceptionHandling;
 using Volo.Abp.Modularity;
-using Volo.Abp.SettingManagement;
-using Volo.Abp.SettingManagement.EntityFrameworkCore;
-using Volo.Abp.SettingManagement.Web;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation;
 using Volo.Abp.UI.Navigation.Urls;
-using Volo.Abp.Uow;
 using Volo.Abp.Validation.Localization;
 using Volo.Abp.VirtualFileSystem;
 
@@ -39,15 +33,7 @@ namespace ToolMan;
     typeof(AbpEntityFrameworkCoreSqliteModule),
     typeof(AbpSwashbuckleModule),
     typeof(AbpAspNetCoreSerilogModule),
-    //typeof(AbpAspNetCoreMvcUiLeptonXLiteThemeModule),
     typeof(AbpAspNetCoreMvcUiBasicThemeModule),
-
-    // Setting Management module packages
-    typeof(AbpSettingManagementApplicationModule),
-    typeof(AbpSettingManagementEntityFrameworkCoreModule),
-    typeof(AbpSettingManagementHttpApiModule),
-    typeof(AbpSettingManagementWebModule),
-
     typeof(TookitModule)
 )]
 public class ToolManModule : AbpModule
@@ -75,7 +61,6 @@ public class ToolManModule : AbpModule
         ConfigureAutoApiControllers();
         ConfigureVirtualFiles(hostingEnvironment);
         ConfigureLocalization();
-        ConfigureEfCore(context);
     }
 
     private void ConfigureUrls(IConfiguration configuration)
@@ -178,31 +163,6 @@ public class ToolManModule : AbpModule
              * https://docs.automapper.org/en/stable/Configuration-validation.html
              */
             options.AddMaps<ToolManModule>(/* validate: true */);
-        });
-    }
-
-    private void ConfigureEfCore(ServiceConfigurationContext context)
-    {
-        context.Services.AddAbpDbContext<ToolManDbContext>(options =>
-        {
-            /* You can remove "includeAllEntities: true" to create
-             * default repositories only for aggregate roots
-             * Documentation: https://docs.abp.io/en/abp/latest/Entity-Framework-Core#add-default-repositories
-             */
-            options.AddDefaultRepositories(includeAllEntities: true);
-        });
-
-        Configure<AbpDbContextOptions>(options =>
-        {
-            options.Configure(configurationContext =>
-            {
-                configurationContext.UseSqlite();
-            });
-        });
-
-        Configure<AbpUnitOfWorkDefaultOptions>(options =>
-        {
-            options.TransactionBehavior = UnitOfWorkTransactionBehavior.Disabled;
         });
     }
 

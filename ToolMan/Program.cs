@@ -1,4 +1,3 @@
-using ToolMan.Data;
 using Serilog;
 using Serilog.Events;
 using Volo.Abp.Data;
@@ -21,12 +20,6 @@ public class Program
             .WriteTo.Async(c => c.File("Logs/logs.txt"))
             .WriteTo.Async(c => c.Console());
 
-        if (IsMigrateDatabase(args))
-        {
-            loggerConfiguration.MinimumLevel.Override("Volo.Abp", LogEventLevel.Warning);
-            loggerConfiguration.MinimumLevel.Override("Microsoft", LogEventLevel.Warning);
-        }
-
         Log.Logger = loggerConfiguration.CreateLogger();
 
         try
@@ -35,19 +28,10 @@ public class Program
             builder.Host.AddAppSettingsSecretsJson()
                 .UseAutofac()
                 .UseSerilog();
-            if (IsMigrateDatabase(args))
-            {
-                builder.Services.AddDataMigrationEnvironment();
-            }
+
             await builder.AddApplicationAsync<ToolManModule>();
             var app = builder.Build();
             await app.InitializeApplicationAsync();
-
-            if (IsMigrateDatabase(args))
-            {
-                await app.Services.GetRequiredService<ToolManDbMigrationService>().MigrateAsync();
-                return 0;
-            }
 
             Log.Information("Starting ToolMan.");
             await app.RunAsync();
@@ -67,10 +51,5 @@ public class Program
         {
             Log.CloseAndFlush();
         }
-    }
-
-    private static bool IsMigrateDatabase(string[] args)
-    {
-        return args.Any(x => x.Contains("--migrate-database", StringComparison.OrdinalIgnoreCase));
     }
 }
