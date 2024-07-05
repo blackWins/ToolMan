@@ -218,11 +218,19 @@
 
     const jsonEditor = new JSONEditor(document.getElementById("jsoneditor"), jsonEditorOptions)
 
+    function SetYAMLEditorValue(json) {
+        var yamlString = jsyaml.dump(json);
+        if (yamlString == '' || yamlString == '{}\n') {
+            yamlString = '# yaml config';
+        }
+        monaco.editor.getModels()[0].setValue(yamlString);
+    }
+
     if (localStorage.getItem("jsonEditor")) {
         setTimeout(() => {
-            jsonEditor.set(JSON.parse(localStorage.getItem("jsonEditor")));
+            SetYAMLEditorValue(JSON.parse(localStorage.getItem("jsonEditor")))
             $("#jse-bar-refresh").click();
-        }, 200);
+        }, 250);
     }
 
     setInterval(() => {
@@ -233,7 +241,7 @@
 
     $("#jse-bar-new").click(function (e) {
         abp.message.confirm(l('Clear the editor'), function (confirmed) {
-            if (confirmed) { jsonEditor.set({}); }
+            if (confirmed) { SetYAMLEditorValue(''); }
         });
 
     })
@@ -260,7 +268,7 @@
         reader.readAsText(file, "UTF-8");
         reader.onload = (e) => {
             try {
-                jsonEditor.set(JSON.parse(e.target.result));
+                SetYAMLEditorValue(JSON.parse(e.target.result));
                 $("#jse-bar-refresh").click();
                 abp.notify.success();
             }
@@ -269,11 +277,37 @@
             }
         }
     });
+
     $("#jse-bar-refresh").click(function (e) {
         $("#ViewModel_Options").val(jsonEditor.getText());
         $("#ViewModel_Options").trigger("change")
     })
 
+    $("#jse-bar-yaml").click(function (e) {
+        ToggleEditor('yaml');
+    })
+
+    $("#jse-bar-json").click(function (e) {
+        ToggleEditor('json');
+    })
+
+    setTimeout(() => {
+        CreateOrRefreshYAMLEditor("yamleditor");
+    }, 200);
+
+    function ToggleEditor(type) {
+        $("#jse-bar-json").toggle();
+        $("#jse-bar-yaml").toggle();
+        $("#yamlcontainer").toggle();
+        $("#jsoneditor").toggle();
+        if (type == "json") {
+            $("#eName").text("JSON")
+        }
+        else {
+            $("#eName").text("YAML")
+            CreateOrRefreshYAMLEditor("yamleditor");
+        }
+    }
     /*
     
     jsonEditor.options.templates = [{
@@ -291,6 +325,114 @@
     jsonEditor.set(initialJson);
     
     */
+
+    $("#EntityInfo").keydown(function (event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            toolMan.services.cSharp.cSharp.getAbpEntityInfo(event.currentTarget.value)
+                .done((res) => {
+                    var jsonVal = jsonEditor.get()
+                    if (!IsCamelCase(jsonVal)) {
+                        jsonVal["EntityInfo"] = camelToPascalObject(res);
+                    }
+                    else {
+                        jsonVal["entityInfo"] = res;
+                    }
+                    SetYAMLEditorValue(jsonVal)
+                    abp.notify.success(l("The EntityInfo node has been updated"))
+                })
+        }
+    });
+
+    function IsCamelCase(jsonObject) {
+        const keys = Object.keys(jsonObject);
+        if (keys.length === 0) {
+            return true;
+        }
+        const firstKey = keys[0];
+        if (firstKey.charAt(0) === firstKey.charAt(0).toUpperCase()) {
+            return false;// PascalCase
+        } else {
+            return true;// camelCase
+        }
+    }
+
+    $("#jse-bar-pascal").click(function (e) {
+        var jsonObject = camelToPascalObject(jsonEditor.get());
+        SetYAMLEditorValue(jsonObject);
+        abp.notify.success(l("The conversion was successful"))
+    })
+
+    $("#jse-bar-camel").click(function (e) {
+        var jsonObject = pascalToCamelObject(jsonEditor.get());
+        SetYAMLEditorValue(jsonObject);
+        abp.notify.success(l("The conversion was successful"))
+    })
+
+    function camelToPascalObject(obj) {
+        if (typeof obj !== 'object' || obj === null) {
+            return obj;
+        }
+
+        if (Array.isArray(obj)) {
+            return obj.map(camelToPascalObject);
+        }
+
+        return Object.keys(obj).reduce((acc, key) => {
+            const pascalKey = key.charAt(0).toUpperCase() + key.slice(1);
+            acc[pascalKey] = camelToPascalObject(obj[key]);
+            return acc;
+        }, {});
+    }
+
+    function pascalToCamelObject(obj) {
+        if (typeof obj !== 'object' || obj === null) {
+            return obj;
+        }
+
+        if (Array.isArray(obj)) {
+            return obj.map(pascalToCamelObject);
+        }
+
+        return Object.keys(obj).reduce((acc, key) => {
+            const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
+            acc[camelKey] = pascalToCamelObject(obj[key]);
+            return acc;
+        }, {});
+    }
+
+    /************************************************************************
+     * yaml config editor Configurations                                          *
+     ************************************************************************/
+    function CreateOrRefreshYAMLEditor(id) {
+        if ($("#" + id)[0].childElementCount != 0) {
+            var jsonObject = jsonEditor.get();
+            SetYAMLEditorValue(jsonObject);
+            return;
+        }
+
+        let model = monaco.editor.create(document.getElementById(id), {
+            acceptSuggestionOnCommitCharacter: true,
+            acceptSuggestionOnEnter: 'on',
+            accessibilitySupport: 'on',
+            autoClosingBrackets: 'always',
+            autoClosingDelete: 'always',
+            autoClosingOvertype: 'always',
+            autoClosingQuotes: 'always',
+            autoIndent: 'None',
+            automaticLayout: true,
+            codeLens: false,
+            value: '# yaml ' + l('Options'),
+            theme: 'vs-light',
+            fontSize: 14,
+            language: 'yaml'
+        });
+
+        model.onDidChangeModelContent(function () {
+            var yamlString = model.getValue();
+            jsonEditor.set(jsyaml.load(yamlString));
+        });
+    }
 
     /************************************************************************
      * DynamicTab Configurations                                            *
@@ -336,7 +478,7 @@
 
         document.querySelectorAll('.dynamic-tab > a').forEach((element, index) => {
             if (element.getAttribute('href') == currentTabId) {
-                var content = monaco.editor.getModels()[index];
+                var content = monaco.editor.getModels()[index + 1];
                 if (modelChangeList.indexOf(id) == -1) {
                     contentDispose(content);
                 } else {

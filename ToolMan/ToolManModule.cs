@@ -5,6 +5,7 @@ using ToolMan.Localization;
 using ToolMan.Menus;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.Mvc;
+using Volo.Abp.AspNetCore.Mvc.AntiForgery;
 using Volo.Abp.AspNetCore.Mvc.Localization;
 using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic;
@@ -152,6 +153,11 @@ public class ToolManModule : AbpModule
 
     private void ConfigureSwagger(IServiceCollection services)
     {
+        services.Configure<AbpAntiForgeryOptions>(options =>
+        {
+            options.AutoValidate = false;
+        });
+
         services.AddAbpSwaggerGen(
             options =>
             {

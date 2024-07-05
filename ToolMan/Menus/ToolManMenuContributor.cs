@@ -42,7 +42,7 @@ public class ToolManMenuContributor : IMenuContributor
            new ApplicationMenuItem(
                ToolManMenus.CSharp,
                l["Menu:CSharp"],
-               "/CSharp",
+               "/Generictor?IsAbp=true",
                icon: "fas fa-code"
            )
        );

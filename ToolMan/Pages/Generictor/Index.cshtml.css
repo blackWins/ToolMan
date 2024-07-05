@@ -51,3 +51,12 @@ pannel {
 .dynamic-tab-content {
     height: 86vh
 }
+
+.br-7 {
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.mb-7 {
+    margin-bottom: 7px;
+}

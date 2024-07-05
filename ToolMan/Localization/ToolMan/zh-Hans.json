@@ -48,8 +48,10 @@
     "Clear the editor": "清空编辑器",
     "Files starting with $ in the template path are used as the corresponding file under the mapping output path by default.": "模板路径下以$开头的文件将用作映射输出路径下的相应文件。",
     "Template path .ToolMan does not output folders for reservation.": "模板路径下.ToolMan为保留文件夹不会进行输出。",
-    "The EntityInfo node has been updated": "entityInfo 节点已更新",
-    "Used to quickly populate the template EntityInfo parameter": "用于快速填充模板 entityInfo 参数",
-    "Fill in the file path and press Enter to confirm": "填入文件路径，回车键确认"
+    "The EntityInfo node has been updated": "EntityInfo 节点已更新",
+    "Used to quickly populate the template EntityInfo parameter": "用于快速填充模板 EntityInfo 参数",
+    "Fill in the file path and press Enter to confirm": "填入文件路径，回车键确认",
+    "AbpEntityInfo": "Abp实体模型",
+    "The conversion was successful": "转换成功"
   }
 }

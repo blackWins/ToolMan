@@ -261,3 +261,4 @@ ToolMan/Logs/*
 
 # Use abp install-libs to restore.
 **/wwwroot/libs/*
+/ToolMan/appsettings.Development.json

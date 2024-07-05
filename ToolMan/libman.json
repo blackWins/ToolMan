@@ -17,6 +17,10 @@
     {
       "library": "monaco-editor@0.45.0",
       "destination": "wwwroot/libs/monaco-editor/"
+    },
+    {
+      "library": "js-yaml@4.1.0",
+      "destination": "wwwroot/libs/js-yaml/"
     }
   ]
 }

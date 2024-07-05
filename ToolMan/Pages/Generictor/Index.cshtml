@@ -22,6 +22,7 @@
     <link href="~/libs/jsoneditor/jsoneditor.min.css" rel="stylesheet" />
 }
 @section scripts {
+    <script src="~/libs/js-yaml/js-yaml.min.js"></script>
     <script src="~/libs/jsoneditor/jsoneditor.min.js"></script>
     <script src="~/libs/jstree/jstree.min.js"></script>
     <script src="~/libs/highlight.js/highlight.min.js"></script>
@@ -43,16 +44,38 @@
             <abp-tab title="@L["Options"].Value" name="Options">
                 <abp-row>
                     <abp-column size="_6">
-                        <label>@L["Options"]</label>
+                        @if (Model.IsAbp)
+                        {
+                            <abp-input asp-for="EntityInfo" />
+                        }
                         <abp-input asp-for="ViewModel.Options" />
-                        <div class="text-end p-1 bg-primary">
+                        <div class="text-end p-1 bg-primary br-7 mb-7">
+                            <label class="pull-left ps-2" style="float: left; font-size: 12px;color: white;"><span id="eName">YAML</span> Editor</label>
+
+
+                            <button id="jse-bar-yaml" class="yaml-model btn btn-sm btn-primary fa fa-bars" title="@L["YAML Editor"].Value" style="display: none;"></button>
+                            <button id="jse-bar-json" class="json-modal btn btn-sm btn-primary fa fa-code" title="@L["JSON Editor"].Value"></button>
+
+                            <span class="text-white">|</span>
+
+                            <button id="jse-bar-pascal" class="btn btn-sm btn-primary fa fa-font" title="@L["To Pascal"].Value"></button>
+                            <button id="jse-bar-camel" class="btn btn-sm btn-primary fa fa-info" title="@L["To Camel"].Value"></button>
+
+                            <span class="text-white">|</span>
+
                             <button id="jse-bar-new" class="btn btn-sm btn-primary fa fa-file" title="@L["New"].Value"></button>
                             <button id="jse-bar-save" class="btn btn-sm btn-primary fa fa-download" title="@L["Save to disk"].Value"></button>
                             <button id="jse-bar-open" class="btn btn-sm btn-primary fa fa-folder-open" title="@L["Open from disk"].Value"></button>
                             <input id="jse-bar-open-file" class="d-none" type="file" accept=".json">
+
+                            <span class="text-white">|</span>
+
                             <button id="jse-bar-refresh" class="btn btn-sm btn-primary fa fa-refresh" title="@L["Refresh preview"].Value"></button>
                         </div>
-                        <div id="jsoneditor"></div>
+                        <div id="jsoneditor" class="br-7" style="display: none;"></div>
+                        <div id="yamlcontainer">
+                            <div id="yamleditor"></div>
+                        </div>
                     </abp-column>
                     <abp-column size="_6">
                         <abp-input asp-for="ViewModel.OutputPath" />
@@ -83,10 +106,11 @@
     setTimeout(function () {
         var resizer = document.getElementById("resizer");
         var treePanel = document.getElementById("treePanel");
-
+        let h = @(Model.IsAbp ? 306 : 213);
         var setHeight = function (innerHeight) {
             document.getElementById("jstree").style.height = (innerHeight - 244) + "px";
-            document.getElementById("jsoneditor").style.height = (innerHeight - 206) + "px";
+            document.getElementById("jsoneditor").style.height = (innerHeight - h) + "px";
+            document.getElementById("yamleditor").style.height = (innerHeight - h) + "px";
             document.getElementById("Preview").style.height = (innerHeight - 310) + "px";
         }
         window.addEventListener('resize', (e) => { setHeight(window.innerHeight) })
