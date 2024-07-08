@@ -21,9 +21,8 @@ namespace Toolkit.Generator
         {
             DirectoryInfo dir = new DirectoryInfo(templateDirectoryPath);
 
-            //skip contain @ symbol path
             var files = dir.GetFiles(searchPattern, SearchOption.AllDirectories)
-                .Where(x => !x.FullName.Contains(TookitConsts.PRESERVE_PATH) && !x.FullName.Contains("@"))
+                .Where(x => !x.FullName.Contains(TookitConsts.PRESERVE_PATH))
                 .Select(x => x.FullName)
                 .ToArray();
 
@@ -40,7 +39,11 @@ namespace Toolkit.Generator
 
                 targetFullFileName = targetFullFileName.Replace("@", string.Empty);
 
+                //path contains @ symbol and target file name not start with @ symbol and target file exists, skip
                 if (Path.GetDirectoryName(file).Contains("@") && !targetFileName.StartsWith("@") && File.Exists(targetFullFileName)) continue;
+
+                //path not contains @ symbol and target file name start with @ symbol, skip
+                if (!Path.GetDirectoryName(file).Contains("@") && targetFileName.StartsWith("@")) continue;
 
                 if (targetFileName.StartsWith("$"))
                 {
