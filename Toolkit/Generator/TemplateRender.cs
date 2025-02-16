@@ -24,25 +24,25 @@ namespace Toolkit.Generator
         }
 
         public virtual async Task<string> RenderAsync(
-            [NotNull] string templateContent,
+            [NotNull] string template,
             [CanBeNull] JObject? model = null,
             [CanBeNull] Dictionary<string, object>? globalContext = null,
-            [CanBeNull] string? includeTemplatePath = null)
+            [CanBeNull] string? includeFilePath = null)
         {
             if (globalContext == null)
             {
                 globalContext = new Dictionary<string, object>();
             }
 
-            var context = CreateScribanTemplateContext(globalContext, model);
+            var context = CreateTemplateContext(globalContext, model);
 
-            if (!templateContent.IsNullOrWhiteSpace())
+            if (!template.IsNullOrWhiteSpace())
             {
-                context.TemplateLoader = new TemplateLoader(Directory.Exists(includeTemplatePath) ? includeTemplatePath! : Path.GetDirectoryName(includeTemplatePath));
+                context.TemplateLoader = new TemplateLoader(Directory.Exists(includeFilePath) ? includeFilePath! : Path.GetDirectoryName(includeFilePath));
             }
 
             var content = (await Template
-                   .Parse(templateContent)
+                   .Parse(template)
                    .RenderAsync(context)).Replace("\r\n", Environment.NewLine);
 
             context.CurrentGlobal.TryGetValue(TookitConsts.SKIP_GENERATE, out object value);
@@ -55,7 +55,7 @@ namespace Toolkit.Generator
             return content;
         }
 
-        protected virtual TemplateContext CreateScribanTemplateContext(Dictionary<string, object> globalContext, JObject? model = null)
+        protected virtual TemplateContext CreateTemplateContext(Dictionary<string, object> globalContext, JObject? model = null)
         {
             var context = new TemplateContext();
 
@@ -66,7 +66,7 @@ namespace Toolkit.Generator
 
             if (model != null)
             {
-                scriptObject.Import(ConvertFromJson(model), renamer: member => member.Name);
+                scriptObject.Import(ToScriptObject(model), renamer: member => member.Name);
                 context.MemberRenamer = member => member.Name;
             }
 
@@ -76,23 +76,23 @@ namespace Toolkit.Generator
             return context;
         }
 
-        protected virtual ScriptObject ConvertFromJson(JObject element)
+        protected virtual ScriptObject ToScriptObject(JObject element)
         {
             var obj = new ScriptObject();
             foreach (var prop in element.Properties())
             {
                 if (prop.Value.Type == JTokenType.Object)
                 {
-                    obj[prop.Name] = ConvertFromJson(prop.Value.ToObject<JObject>()!);
+                    obj[prop.Name] = ToScriptObject(prop.Value.ToObject<JObject>()!);
                     continue;
                 }
 
-                obj[prop.Name] = ConvertFromJson(prop.Value);
+                obj[prop.Name] = GetTokenValue(prop.Value);
             }
             return obj;
         }
 
-        protected virtual object ConvertFromJson(JToken token)
+        protected virtual object GetTokenValue(JToken token)
         {
             switch (token.Type)
             {
@@ -100,7 +100,7 @@ namespace Toolkit.Generator
                     var array = new ScriptArray();
                     foreach (var nestedElement in token.Children())
                     {
-                        array.Add(ConvertFromJson(nestedElement));
+                        array.Add(GetTokenValue(nestedElement));
                     }
                     return array;
                 case JTokenType.String:
