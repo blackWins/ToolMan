@@ -332,17 +332,34 @@
             toolMan.services.cSharp.cSharp.getAbpEntityInfo(event.currentTarget.value)
                 .done((res) => {
                     var jsonVal = jsonEditor.get()
+                    var entityName = res.name;
+                    res.relativeNamespace = removePrefix(res.relativeNamespace, jsonVal.projectInfo.fullName + '.')
+                    res.relativeDirectory = res.relativeNamespace.replace('.', '/')
+                    var dtoInfo = {
+                        readTypeName: entityName + "Dto",
+                        createTypeName: `CreateUpdate${entityName}Dto`,
+                        updateTypeName: `CreateUpdate${entityName}Dto`
+                    };
+                    if (jsonVal.option.separateDto) {
+                        dtoInfo.createTypeName = `Create${entityName}Dto`;
+                        dtoInfo.updateTypeName = `Update${entityName}Dto`;
+                    }
                     if (!IsCamelCase(jsonVal)) {
                         jsonVal["EntityInfo"] = camelToPascalObject(res);
+                        jsonVal["DtoInfo"] = camelToPascalObject(dtoInfo);
                     }
                     else {
                         jsonVal["entityInfo"] = res;
+                        jsonVal["dtoInfo"] = dtoInfo;
                     }
                     SetYAMLEditorValue(jsonVal)
                     abp.notify.success(l("The EntityInfo node has been updated"))
                 })
         }
     });
+    function removePrefix(str, prefix) {
+        return str.startsWith(prefix) ? str.slice(prefix.length) : str;
+    }
 
     function IsCamelCase(jsonObject) {
         const keys = Object.keys(jsonObject);
