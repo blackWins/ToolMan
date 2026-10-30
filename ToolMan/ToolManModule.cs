@@ -1,10 +1,9 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi;
 using Toolkit;
 using ToolMan.Localization;
 using ToolMan.Menus;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.Mvc;
-using Volo.Abp.AspNetCore.Mvc.AntiForgery;
 using Volo.Abp.AspNetCore.Mvc.Localization;
 using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic;
@@ -50,6 +49,12 @@ public class ToolManModule : AbpModule
     {
         var hostingEnvironment = context.Services.GetHostingEnvironment();
         var configuration = context.Services.GetConfiguration();
+
+        if (hostingEnvironment.IsDevelopment())
+        {
+            context.Services.AddRazorPages()
+                .AddRazorRuntimeCompilation();
+        }
 
         ConfigureUrls(configuration);
         ConfigureBundles();
@@ -136,11 +141,6 @@ public class ToolManModule : AbpModule
 
     private void ConfigureSwagger(IServiceCollection services)
     {
-        services.Configure<AbpAntiForgeryOptions>(options =>
-        {
-            options.AutoValidate = false;
-        });
-
         services.AddAbpSwaggerGen(
             options =>
             {
@@ -182,7 +182,7 @@ public class ToolManModule : AbpModule
         }
 
         app.UseCorrelationId();
-        app.UseStaticFiles();
+        app.MapAbpStaticAssets();
         app.UseRouting();
 
         app.UseUnitOfWork();

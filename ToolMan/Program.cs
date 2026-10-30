@@ -1,6 +1,4 @@
 using Serilog;
-using Serilog.Events;
-using Volo.Abp.Data;
 
 namespace ToolMan;
 
@@ -8,27 +6,22 @@ public class Program
 {
     public async static Task<int> Main(string[] args)
     {
-        var loggerConfiguration = new LoggerConfiguration()
-#if DEBUG
-            .MinimumLevel.Debug()
-#else
-            .MinimumLevel.Information()
-#endif
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-            .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
-            .Enrich.FromLogContext()
+        Log.Logger = new LoggerConfiguration()
             .WriteTo.Async(c => c.File("Logs/logs.txt"))
-            .WriteTo.Async(c => c.Console());
-
-        Log.Logger = loggerConfiguration.CreateLogger();
+            .WriteTo.Async(c => c.Console())
+            .CreateBootstrapLogger();
 
         try
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Host.AddAppSettingsSecretsJson()
                 .UseAutofac()
-                .UseSerilog();
-
+                .UseSerilog((context, services, loggerConfiguration) =>
+                {
+                    loggerConfiguration
+                        .ReadFrom.Configuration(context.Configuration)
+                        .ReadFrom.Services(services);
+                });
             await builder.AddApplicationAsync<ToolManModule>();
             var app = builder.Build();
             await app.InitializeApplicationAsync();

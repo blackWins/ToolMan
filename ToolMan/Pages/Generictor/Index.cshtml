@@ -49,28 +49,30 @@
                             <abp-input asp-for="EntityInfo" />
                         }
                         <abp-input asp-for="ViewModel.Options" />
-                        <div class="text-end p-1 bg-primary br-7 mb-7">
-                            <label class="pull-left ps-2" style="float: left; font-size: 12px;color: white;"><span id="eName">YAML</span> Editor</label>
+                        <div class="text-end p-1 bg-primary br-7 mb-7 d-flex align-items-center">
+                            <label class="ps-2 me-auto mb-0" style="font-size: 12px; color: white;">
+                                <span id="eName">YAML</span> Editor
+                            </label>
+                            <div class="options-toolbar">
+                                <button id="jse-bar-yaml" class="yaml-model btn btn-sm btn-primary fa fa-bars" title="@L["YAML Editor"].Value" style="display: none;"></button>
+                                <button id="jse-bar-json" class="json-modal btn btn-sm btn-primary fa fa-code" title="@L["JSON Editor"].Value"></button>
 
+                                <span class="text-white">|</span>
 
-                            <button id="jse-bar-yaml" class="yaml-model btn btn-sm btn-primary fa fa-bars" title="@L["YAML Editor"].Value" style="display: none;"></button>
-                            <button id="jse-bar-json" class="json-modal btn btn-sm btn-primary fa fa-code" title="@L["JSON Editor"].Value"></button>
+                                <button id="jse-bar-pascal" class="btn btn-sm btn-primary fa fa-font" title="@L["To Pascal"].Value"></button>
+                                <button id="jse-bar-camel" class="btn btn-sm btn-primary fa fa-info" title="@L["To Camel"].Value"></button>
 
-                            <span class="text-white">|</span>
+                                <span class="text-white">|</span>
 
-                            <button id="jse-bar-pascal" class="btn btn-sm btn-primary fa fa-font" title="@L["To Pascal"].Value"></button>
-                            <button id="jse-bar-camel" class="btn btn-sm btn-primary fa fa-info" title="@L["To Camel"].Value"></button>
+                                <button id="jse-bar-new" class="btn btn-sm btn-primary fa fa-file" title="@L["New"].Value"></button>
+                                <button id="jse-bar-save" class="btn btn-sm btn-primary fa fa-download" title="@L["Save to disk"].Value"></button>
+                                <button id="jse-bar-open" class="btn btn-sm btn-primary fa fa-folder-open" title="@L["Open from disk"].Value"></button>
+                                <input id="jse-bar-open-file" class="d-none" type="file" accept=".json">
 
-                            <span class="text-white">|</span>
+                                <span class="text-white">|</span>
 
-                            <button id="jse-bar-new" class="btn btn-sm btn-primary fa fa-file" title="@L["New"].Value"></button>
-                            <button id="jse-bar-save" class="btn btn-sm btn-primary fa fa-download" title="@L["Save to disk"].Value"></button>
-                            <button id="jse-bar-open" class="btn btn-sm btn-primary fa fa-folder-open" title="@L["Open from disk"].Value"></button>
-                            <input id="jse-bar-open-file" class="d-none" type="file" accept=".json">
-
-                            <span class="text-white">|</span>
-
-                            <button id="jse-bar-refresh" class="btn btn-sm btn-primary fa fa-refresh" title="@L["Refresh preview"].Value"></button>
+                                <button id="jse-bar-refresh" class="btn btn-sm btn-primary fa fa-refresh" title="@L["Refresh preview"].Value"></button>
+                            </div>
                         </div>
                         <div id="jsoneditor" class="br-7" style="display: none;"></div>
                         <div id="yamlcontainer">

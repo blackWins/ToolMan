@@ -1,4 +1,6 @@
-﻿using Volo.Abp.DependencyInjection;
+using Microsoft.Extensions.Localization;
+using ToolMan.Localization;
+using Volo.Abp.DependencyInjection;
 using Volo.Abp.Ui.Branding;
 
 namespace ToolMan;
@@ -6,5 +8,12 @@ namespace ToolMan;
 [Dependency(ReplaceServices = true)]
 public class ToolManBrandingProvider : DefaultBrandingProvider
 {
-    public override string AppName => "ToolMan";
+    private IStringLocalizer<ToolManResource> _localizer;
+
+    public ToolManBrandingProvider(IStringLocalizer<ToolManResource> localizer)
+    {
+        _localizer = localizer;
+    }
+
+    public override string AppName => _localizer["AppName"];
 }
