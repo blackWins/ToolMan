@@ -62,7 +62,7 @@ namespace Toolkit.Generator
             var scriptObject = new ScriptObject();
 
             scriptObject.Import(globalContext);
-            scriptObject.SetValue("abp", new AbpScriptObject(), true);
+            scriptObject.SetValue("tool", new ToolScriptObject(), true);
 
             if (model != null)
             {
@@ -103,6 +103,13 @@ namespace Toolkit.Generator
                         array.Add(GetTokenValue(nestedElement));
                     }
                     return array;
+                case JTokenType.Object:
+                    var obj = new ScriptObject();
+                    foreach (var property in token.Children<JProperty>())
+                    {
+                        obj[property.Name] = GetTokenValue(property.Value);
+                    }
+                    return obj;
                 case JTokenType.String:
                     return token.ToString();
                 case JTokenType.Integer:
