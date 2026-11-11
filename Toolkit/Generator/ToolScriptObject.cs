@@ -22,7 +22,7 @@ namespace Toolkit.Generator
 
         public static string JoinAsString(ScriptArray array, string separator)
         {
-            return string.Join(separator, array.Where(x => x != null));
+            return string.Join(separator, array.Where(x => x != null && x.ToString() != ""));
         }
     }
 }
