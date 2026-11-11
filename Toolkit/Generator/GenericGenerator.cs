@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using Volo.Abp.DependencyInjection;
 
@@ -11,10 +12,12 @@ namespace Toolkit.Generator
     public class GenericGenerator : ITransientDependency
     {
         private readonly TemplateRender _templateRender;
+        private ILogger<GenericGenerator> _logger;
 
-        public GenericGenerator(TemplateRender templateRender)
+        public GenericGenerator(TemplateRender templateRender, ILogger<GenericGenerator> logger)
         {
             _templateRender = templateRender;
+            _logger = logger;
         }
 
         public virtual async Task RenderAsync(string templateDirectoryPath, string targetPath, JObject model, string searchPattern = "*.*")
@@ -33,6 +36,7 @@ namespace Toolkit.Generator
         {
             foreach (var file in files)
             {
+                _logger.LogInformation($"Rendering template file: {file}");
                 var targetFullFileName = await _templateRender.RenderAsync(file.Replace(templateDirectoryPath, targetPath), model);
 
                 var targetFileName = Path.GetFileName(targetFullFileName);
