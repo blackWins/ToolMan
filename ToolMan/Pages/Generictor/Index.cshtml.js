@@ -333,17 +333,13 @@
                 .done((res) => {
                     var jsonVal = jsonEditor.get()
                     var entityName = res.name;
-                    res.relativeNamespace = removePrefix(res.relativeNamespace, jsonVal.projectInfo.fullName + '.')
+                    res.relativeNamespace = removePrefix(removePrefix(res.relativeNamespace, jsonVal.projectInfo.fullName), '.');
                     res.relativeDirectory = res.relativeNamespace.replace('.', '/')
                     var dtoInfo = {
                         readTypeName: entityName + "Dto",
-                        createTypeName: `CreateUpdate${entityName}Dto`,
-                        updateTypeName: `CreateUpdate${entityName}Dto`
+                        createTypeName: jsonVal.option.separateDto ? `Create${entityName}Dto` : `CreateUpdate${entityName}Dto`,
+                        updateTypeName: jsonVal.option.separateDto ? `Update${entityName}Dto` : `CreateUpdate${entityName}Dto`
                     };
-                    if (jsonVal.option.separateDto) {
-                        dtoInfo.createTypeName = `Create${entityName}Dto`;
-                        dtoInfo.updateTypeName = `Update${entityName}Dto`;
-                    }
                     if (!IsCamelCase(jsonVal)) {
                         jsonVal["EntityInfo"] = camelToPascalObject(res);
                         jsonVal["DtoInfo"] = camelToPascalObject(dtoInfo);
